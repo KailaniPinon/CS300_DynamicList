@@ -24,18 +24,19 @@ bin:
 	mkdir -p bin
 
 #Create listdriver
-bin/listdriver: bin/listdriver.o bin/list.o
+bin/listdriver: bin/listdriver.o \
+bin/list.o
 	${CC} ${CFLAGS} -o bin/listdriver bin/listdriver.o \
-	bin/list.o 
+	bin/list.o
 
 bin/listdriver.o: src/listdriver.c include/list.h
 	${CC} ${CFLAGS} -c -o bin/listdriver.o src/listdriver.c 
 
 bin/list.o: src/list.c include/list.h
-	${CC} ${CFLAGS} -c po bin/list.o src/list.c 
+	${CC} ${CFLAGS} -c -o bin/list.o src/list.c 
 
 tarball: clean
 	tar czf ../cs300_2B_pino3567.tar.gz ../GenericDynamicList
 
 clean:
-	rm -rf bin/*.o bin/listdriver
+	rm -rf bin/*.o ${TARGETS}

@@ -64,8 +64,8 @@ void pqueueCreate (PriorityQueuePtr psQueue)
 	}
 	else
 	{
-		ListPtr myList;
-		//lstCreate(myList);
+		//ListPtr myList;
+		lstCreate(&psQueue->sTheList);
 		//lstLoadErrorMessages();
 	}
 }
@@ -107,7 +107,7 @@ int pqueueSize (const PriorityQueuePtr psQueue)
 	{
 		processPQError("pqueueSize", ERROR_INVALID_PQ);
 	}
-	return 0/*lstSize(psQueue->sTheList)*/;
+	return lstSize(&psQueue->sTheList);
 }
 
 /**************************************************************************

@@ -69,7 +69,15 @@ static void assert (bool bExpression, char *pTrue, char *pFalse)
 //todo: documentation for main
 int main()
 {
-	assert (10 > 0, "test works (10 > 0)", "test failed (10>0)");
+	int queueSize = 0;
+
+	PriorityQueue sMyList;
+
+	pqueueCreate(&sMyList);
+	assert (&sMyList != NULL, "sMyList is not NULL", "sMyList is NULL");
+
+	queueSize = pqueueSize(&sMyList);
+	assert (queueSize == 0 , "The size of the queue is 0", "The size of the queue is not 0");
 
 	puts("TEST: END.");
 	return EXIT_SUCCESS;
