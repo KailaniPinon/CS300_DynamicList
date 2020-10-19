@@ -4,7 +4,7 @@
  Date:          10.09.2020
  Class:         CS300
  Assignment:    Dynamic Priority Queue List
- Purpose:       This file ... todo: add purpose
+ Purpose:       Practice creating a priority queue ADT based on list ADT
  *************************************************************************/
 #include "../../GenericDynamicList/include/list.h"
 #include "../include/pqueue.h"
@@ -12,10 +12,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-
-//todo: ADD VALGRIND
-//todo: copy/paste SUCCESS, FAILURE, and ASSERT functions
-//and make sure asserts adequately describe what I'm testing!!!
 
 /**************************************************************************
  Function: 	 	success
@@ -66,19 +62,32 @@ static void assert (bool bExpression, char *pTrue, char *pFalse)
 	}
 }
 
-//todo: documentation for main
+/**************************************************************************
+ Function: 	 	main
+
+ Description: test all the functionality of the priority queue
+
+ Parameters:	none
+
+ Returned:	 	none
+ *************************************************************************/
 int main()
 {
-	int queueSize = 0;
 
-	PriorityQueue sMyList;
+	PriorityQueue sMyQueue;
+	PriorityQueueElement sMyPQElement; //an item to insert to queue/list
+	int queueSize = 0, myPriority;
 
-	pqueueCreate(&sMyList);
-	assert (&sMyList != NULL, "sMyList is not NULL", "sMyList is NULL");
+	lstLoadErrorMessages ();
+	pqueueCreate (&sMyQueue);
+	//assert (&sMyQueue != NULL, "sMyList is not NULL", "sMyList is NULL");
 
-	queueSize = pqueueSize(&sMyList);
-	assert (queueSize == 0 , "The size of the queue is 0", "The size of the queue is not 0");
+	queueSize = pqueueSize (&sMyQueue);
+	assert (queueSize == 0, "The size of the queue is 0",
+			"The size of the queue is not 0");
+myPriority = 1;
+pqueueEnqueue(&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement), myPriority);
 
-	puts("TEST: END.");
+	puts ("TEST: END.");
 	return EXIT_SUCCESS;
 }

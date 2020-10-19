@@ -52,7 +52,6 @@ typedef struct PriorityQueueElement
 } PriorityQueueElement;
 typedef PriorityQueueElement* PriorityQueueElementPtr;
 
-
 typedef struct PriorityQueue *PriorityQueuePtr;
 typedef struct PriorityQueue
 {

@@ -12,7 +12,7 @@
 #include <stdbool.h>
 #include "../include/list.h"
 
-char* gszListErrors[NUMBER_OF_LIST_ERRORS][MAX_ERROR_LIST_CHARS];
+char gszListErrors[NUMBER_OF_LIST_ERRORS][MAX_ERROR_LIST_CHARS];
 
 /**************************************************************************
  Function:			processAndPrintListError
@@ -26,7 +26,7 @@ char* gszListErrors[NUMBER_OF_LIST_ERRORS][MAX_ERROR_LIST_CHARS];
  *************************************************************************/
 static void processListError (const char *pszFunctionName, int errorCode)
 {
-	printf ("Function: %s %p \n ", pszFunctionName, gszListErrors[errorCode]);
+	printf ("Function: %s %s \n ", pszFunctionName, gszListErrors[errorCode]);
 
 	exit (EXIT_FAILURE);
 }

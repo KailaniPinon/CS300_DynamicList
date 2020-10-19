@@ -28,7 +28,7 @@ char gszPQErrors[NUMBER_OF_PQ_ERRORS][MAX_ERROR_PQ_CHARS];
  *************************************************************************/
 static void processPQError (const char *pszFunctionName, int errorCode)
 {
-	printf ("Function: %s %p \n ", pszFunctionName, gszPQErrors[errorCode]);
+	printf ("Function: %s %s \n ", pszFunctionName, gszPQErrors[errorCode]);
 
 	exit (EXIT_FAILURE);
 }
@@ -64,9 +64,8 @@ void pqueueCreate (PriorityQueuePtr psQueue)
 	}
 	else
 	{
-		//ListPtr myList;
-		lstCreate(&psQueue->sTheList);
-		//lstLoadErrorMessages();
+		lstCreate (&psQueue->sTheList);
+		lstLoadErrorMessages ();
 	}
 }
 
@@ -88,7 +87,7 @@ void pqueueTerminate (PriorityQueuePtr psQueue)
 	}
 	else
 	{
-		//lstTerminate(psQueue->sTheList));
+		lstTerminate (&psQueue->sTheList);
 	}
 }
 
@@ -105,9 +104,9 @@ int pqueueSize (const PriorityQueuePtr psQueue)
 {
 	if (NULL == psQueue)
 	{
-		processPQError("pqueueSize", ERROR_INVALID_PQ);
+		processPQError ("pqueueSize", ERROR_INVALID_PQ);
 	}
-	return lstSize(&psQueue->sTheList);
+	return lstSize (&psQueue->sTheList);
 }
 
 /**************************************************************************
@@ -123,9 +122,9 @@ bool pqueueIsEmpty (const PriorityQueuePtr psQueue)
 {
 	if (NULL == psQueue)
 	{
-		processPQError("pqueueIsEmpty", ERROR_INVALID_PQ);
+		processPQError ("pqueueIsEmpty", ERROR_INVALID_PQ);
 	}
-	return lstIsEmpty(&psQueue->sTheList);
+	return lstIsEmpty (&psQueue->sTheList);
 }
 
 /**************************************************************************
@@ -141,35 +140,47 @@ bool pqueueIsEmpty (const PriorityQueuePtr psQueue)
 
  Returned:			None
  *************************************************************************/
-void pqueueEnqueue (PriorityQueuePtr psQueue, const void *pBuffer,
-										int size, int priority)
+void pqueueEnqueue (PriorityQueuePtr psQueue, const void *pBuffer, int size,
+		int priority)
 {
+	//psQueue: queue dependent on list
+	//pBuffer: item to insert
+	//size: quantify of memory to reserve according to type of pBuffer
+	//priority: queue "importance" identifier
 	if (NULL == psQueue)
-		{
-			processPQError("pqueueEnqueue", ERROR_INVALID_PQ);
-		}
+	{
+		processPQError ("pqueueEnqueue", ERROR_INVALID_PQ);
+	}
 	else if (NULL == pBuffer)
 	{
-		processPQError("pqueueEnqueue", ERROR_NULL_PQ_PTR);
+		processPQError ("pqueueEnqueue", ERROR_NULL_PQ_PTR);
 	}
+	//create a queue element to store priority value
 	PriorityQueueElementPtr psNewPQElement;
-	psNewPQElement = (PriorityQueueElementPtr) malloc
-									 (sizeof(PriorityQueueElement));
+	psNewPQElement = (PriorityQueueElementPtr) malloc (
+			sizeof(PriorityQueueElement));
 	psNewPQElement->pData = malloc (size);
-	psNewPQElement->priority = priority;
 	memcpy (psNewPQElement->pData, pBuffer, size);
 
-	//move currently node until reaching lowest priority
+	//start at front
+	lstFirst(&psQueue->sTheList);
+//	memcpy(psNewPQElement->priority, psQueue->sTheList->psCurrent->pData,
+//				sizeof(PriorityQueueElement));
+	//move current node until reaching lowest priority
 	//then insert using lstInsertAfter
-	if (psNewPQElement->priority >  priority)
+	if (psNewPQElement->priority > priority)
 	{
-
+		lstInsertAfter(&psQueue->sTheList, &psNewPQElement, size);
+	}
+	else if (psNewPQElement->priority < priority)
+	{
+		lstNext(&psQueue->sTheList);
 	}
 
 	//set to last item, add to end of lowest priority
 	//lstLast(&psQueue->sTheList);
-	lstInsertAfter(&psQueue->sTheList, pBuffer, size);
-	lstInsertAfter(&psQueue->sTheList, psNewPQElement, size);
+	lstInsertAfter (&psQueue->sTheList, pBuffer, size);
+	lstInsertAfter (&psQueue->sTheList, psNewPQElement, size);
 
 	//what does priority do?
 }
