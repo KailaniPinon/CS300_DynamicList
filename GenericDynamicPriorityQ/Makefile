@@ -40,8 +40,9 @@ valgrind: bin/pqueuedriver
 	valgrind -v --leak-check=yes --track-origins=yes --leak-check=full \
 	 --showleak-kinds=all bin/pqueuedriver
 
+#one directory out
 tarball: clean
-	tar czf ../cs300_3_pino3567.tar.gz ../../CS300_DynamicList_Repo
+	tar czf ../cs300_3_pino3567.tar.gz ../../CS300_DynamicList
 
 clean:
 	rm -rf bin/*.o bin/pqueuedriver #../GenericDynamicList/bin/list.o

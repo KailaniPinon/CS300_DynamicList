@@ -152,9 +152,25 @@ void pqueueEnqueue (PriorityQueuePtr psQueue, const void *pBuffer,
 	{
 		processPQError("pqueueEnqueue", ERROR_NULL_PQ_PTR);
 	}
-	//set to last item, add to end of line
-	lstLast(&psQueue->sTheList);
+	PriorityQueueElementPtr psNewPQElement;
+	psNewPQElement = (PriorityQueueElementPtr) malloc
+									 (sizeof(PriorityQueueElement));
+	psNewPQElement->pData = malloc (size);
+	psNewPQElement->priority = priority;
+	memcpy (psNewPQElement->pData, pBuffer, size);
+
+	//move currently node until reaching lowest priority
+	//then insert using lstInsertAfter
+	if (psNewPQElement->priority >  priority)
+	{
+
+	}
+
+	//set to last item, add to end of lowest priority
+	//lstLast(&psQueue->sTheList);
 	lstInsertAfter(&psQueue->sTheList, pBuffer, size);
+	lstInsertAfter(&psQueue->sTheList, psNewPQElement, size);
+
 	//what does priority do?
 }
 
@@ -192,7 +208,9 @@ void *pqueueDequeue (PriorityQueuePtr psQueue, void *pBuffer,
 		lstFirst(&psQueue->sTheList);
 		lstDeleteCurrent(&psQueue->sTheList, pBuffer, size);
 	}
-	return pBuffer;
+	//element priority value -> associate with pPriority
+	//memccpy()
+	return pPriority;
 }
 
 //todo: Dequeue (NOT DONE), Peek, ChangePriority
