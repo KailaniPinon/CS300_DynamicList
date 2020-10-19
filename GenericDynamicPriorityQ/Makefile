@@ -18,17 +18,21 @@ all: bin bin/pqueuedriver
 bin:
 	mkdir -p bin
 
+#executable and dependencies
 bin/pqueuedriver: bin/pqueuedriver.o bin/pqueue.o \
 ../GenericDynamicList/bin/list.o
 	${CC} ${CFLAGS} bin/pqueuedriver.o bin/pqueue.o \
 	../GenericDynamicList/bin/list.o -o bin/pqueuedriver
 
+#driver object and dependencies, needed for executable (see line 22)
 bin/pqueuedriver.o: src/pqueuedriver.c include/pqueue.h
 	${CC} ${CFLAGS} -c src/pqueuedriver.c -o bin/pqueuedriver.o
 
+#pqueue object and dependencies, needed for executable (see line 22)
 bin/pqueue.o: src/pqueue.c include/pqueue.h
 	${CC} ${CFLAGS} -c src/pqueue.c -o bin/pqueue.o
 
+#for memory leak debugging in the terminal
 valgrind: bin/pqueuedriver
 	valgrind -v --leak-check=yes --track-origins=yes --leak-check=full \
 	 --showleak-kinds=all bin/pqueuedriver
