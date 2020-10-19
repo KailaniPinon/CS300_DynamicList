@@ -1,5 +1,5 @@
 /**************************************************************************
- File name:			list.c
+ File name:		list.c
  Author:        Kailani Pinon
  Date:          10.05.2020
  Class:         CS300
@@ -12,7 +12,7 @@
 #include <stdbool.h>
 #include "../include/list.h"
 
-char gszListErrors[NUMBER_OF_LIST_ERRORS][MAX_ERROR_LIST_CHARS];
+char* gszListErrors[NUMBER_OF_LIST_ERRORS][MAX_ERROR_LIST_CHARS];
 
 /**************************************************************************
  Function:			processAndPrintListError
@@ -67,7 +67,6 @@ void lstCreate (ListPtr psList)
 	}
 	//Completely new list. Set size to zero.
 	psList->numElements = 0;
-	//Nothing exists. Set nodes to empty/NULL
 	psList->psCurrent = NULL;
 	psList->psFirst = NULL;
 	psList->psLast = NULL;
@@ -99,56 +98,48 @@ void lstInsertAfter (ListPtr psList, const void *pBuffer, int size)
 	{
 		processListError ("lstInsertAfter", ERROR_NULL_PTR);
 	}
-	else if (!lstIsEmpty(psList) && NULL == psList->psCurrent)
+	else if (!lstIsEmpty (psList) && NULL == psList->psCurrent)
 	{
-			processListError ("lstInsertAfter", ERROR_NO_CURRENT);
+		processListError ("lstInsertAfter", ERROR_NO_CURRENT);
 	}
-	else
-	{
-		//INSERT: Set up conditions for dynamic allocation.
-		//allocate new node
-		ListElementPtr psTempListElement = (ListElementPtr) malloc
-																			 (sizeof(ListElementPtr));
-		//allocate space for data
-		psTempListElement->pData = malloc (size);
-		//put in data
-		memcpy (psTempListElement->pData, pBuffer, size);
-		psTempListElement->psNext = NULL;
+	ListElementPtr psNewListElement;
+	psNewListElement = (ListElementPtr) malloc (sizeof(ListElement));
+	psNewListElement->pData = malloc (size);
+	memcpy (psNewListElement->pData, pBuffer, size);
+	psNewListElement->psNext = NULL;
 
-		//associate current with temporary
-		//memcpy (psList->psCurrent->pData, psTempListElement->pData, size);
-		//if we're starting off with an empty list
-		if (lstIsEmpty(psList))
-		{
-			psList->psCurrent = psTempListElement;
-			psList->psCurrent->psNext = NULL;
-			psList->psFirst = psList->psLast = psList->psCurrent;
-		}
-		//if something already exists in the list
-		else if (!(lstIsEmpty (psList)))
-		{
-			const int LIST_SIZE_1 = 1;
-			if (LIST_SIZE_1 > psList->numElements)
-			{
-				psList->psCurrent = psTempListElement;
-				psList->psFirst->psNext = psList->psCurrent;
-				psList->psLast = psList->psCurrent;
-			}
-			if (psList->psLast != psList->psCurrent)
-			{
-				psTempListElement->psNext = psList->psCurrent->psNext;
-				psList->psCurrent->psNext = psTempListElement;
-				psList->psCurrent = psTempListElement;
-			}
-			else if (NULL == psList->psCurrent->psNext)
-			{
-				psList->psCurrent->psNext = psTempListElement;
-				psList->psCurrent = psTempListElement;
-				psList->psLast = psList->psCurrent;
-			}
-		}
-		psList->numElements++;
+	if (NULL == psList->psFirst) //if empty
+	{
+		psList->psCurrent = psNewListElement;
+		psList->psFirst = psList->psCurrent ;
+		psList->psLast = psList->psCurrent ;
 	}
+	else if (psList->psFirst == psList->psLast) //if only 1 item
+	{
+		psList->psFirst->psNext = psNewListElement;
+		psList->psCurrent = psNewListElement;
+		psList->psLast = psList->psCurrent;
+	}
+	else //if more than 2 items
+	{
+		if (psList->psCurrent == psList->psLast)
+		{
+			psList->psCurrent = psNewListElement;
+			psList->psLast->psNext = psList->psCurrent;
+		}
+		else
+		{
+			psNewListElement->psNext = psList->psCurrent->psNext;
+			psList->psCurrent->psNext = psNewListElement;
+			psList->psCurrent = psNewListElement;
+		}
+	}
+	psList->numElements++;
+
+//	psNewListElement->pData = NULL;
+//	free (psNewListElement->pData);
+//	psNewListElement = NULL;
+//	free (psNewListElement);
 }
 
 /**************************************************************************
@@ -188,8 +179,25 @@ void *lstDeleteCurrent (ListPtr psList, void *pBuffer, int size)
 	}
 	else
 	{
-		free(pBuffer);
-		free(psList->psCurrent);
+		printf ("current: %p\n", psList->psCurrent);
+
+			ListElementPtr psTempListElement;
+			psTempListElement = (ListElementPtr) malloc (sizeof(ListElement));
+			psTempListElement = psList->psCurrent;
+			psTempListElement->psNext = psList->psCurrent->psNext;
+			lstFirst(psList);
+		do
+		{
+			lstNext(psList);
+			printf ("cn: %p, temp: %p", psList->psCurrent->psNext, psTempListElement);
+		} while (psList->psCurrent->psNext != psTempListElement);
+		//ISSUES HERE. LEFT OFF! FIX!
+
+		psList->psCurrent->psNext = psTempListElement->psNext;
+		psList->psCurrent = psTempListElement->psNext;
+
+		free (psTempListElement);
+		psTempListElement = NULL;
 	}
 	return pBuffer;
 }
@@ -210,7 +218,7 @@ void *lstDeleteCurrent (ListPtr psList, void *pBuffer, int size)
 
  Returned:			pBuffer
  *************************************************************************/
-void lstInsertBefore (ListPtr psList, const void *pBuffer,int size)
+void lstInsertBefore (ListPtr psList, const void *pBuffer, int size)
 {
 	if (NULL == psList)
 	{
@@ -220,32 +228,26 @@ void lstInsertBefore (ListPtr psList, const void *pBuffer,int size)
 	{
 		processListError ("lstInsertBefore", ERROR_NULL_PTR);
 	}
-	else if (!lstIsEmpty(psList) && NULL == psList->psCurrent)
+	else if (!lstIsEmpty (psList) && NULL == psList->psCurrent)
 	{
-			processListError ("lstInsertBefore", ERROR_NO_CURRENT);
+		processListError ("lstInsertBefore", ERROR_NO_CURRENT);
 	}
 	else
 	{
-		//INSERT: Set up conditions for dynamic allocation.
-		//allocate new node
-		ListElementPtr psTempListElement = (ListElementPtr) malloc
-																			 (sizeof(ListElementPtr));
-		//allocate space for data
+		ListElementPtr psTempListElement;
+		psTempListElement = (ListElementPtr) malloc (sizeof(ListElement));
 		psTempListElement->pData = malloc (size);
-		//put in data
 		memcpy (psTempListElement->pData, pBuffer, size);
 		psTempListElement->psNext = psList->psCurrent;
 
 		if (psList->psFirst != psList->psCurrent)
 		{
-			ListElementPtr psTempListElementInitialCurrent = (ListElementPtr)
-																											malloc
-																											(sizeof
-																											(ListElementPtr));
-			psTempListElementInitialCurrent->pData = malloc (size);
-			memcpy (psTempListElementInitialCurrent->pData,
-					psList->psCurrent->pData, size);
-			psTempListElementInitialCurrent = psList->psCurrent;
+			ListElementPtr psOriginalListCurrent = (ListElementPtr) malloc
+														(sizeof(ListElementPtr));
+			psOriginalListCurrent->pData = malloc (size);
+			memcpy (psOriginalListCurrent->pData, psList->psCurrent->pData,
+					size);
+			psOriginalListCurrent = psList->psCurrent;
 			//set current to first
 			lstFirst (psList);
 			//move along list until current->next = intialCurrentTemp
@@ -254,9 +256,8 @@ void lstInsertBefore (ListPtr psList, const void *pBuffer,int size)
 			{
 				lstNext (psList);
 				counter++;
-			} while (psList->psCurrent->psNext !=
-					psTempListElementInitialCurrent &&
-					counter < psList->numElements);
+			} while (psList->psCurrent->psNext != psOriginalListCurrent
+					&& counter < psList->numElements);
 
 			psList->psCurrent->psNext = psTempListElement;
 			psList->psCurrent = psTempListElement;
@@ -283,7 +284,7 @@ void lstInsertBefore (ListPtr psList, const void *pBuffer,int size)
 
  Returned:			None
  *************************************************************************/
-void lstUpdateCurrent (ListPtr psList, const void *pBuffer,int size)
+void lstUpdateCurrent (ListPtr psList, const void *pBuffer, int size)
 {
 	if (NULL == psList)
 	{
@@ -293,15 +294,15 @@ void lstUpdateCurrent (ListPtr psList, const void *pBuffer,int size)
 	{
 		processListError ("lstUpdateCurrent", ERROR_NULL_PTR);
 	}
-	else if (lstIsEmpty(psList))
+	else if (lstIsEmpty (psList))
 	{
 		processListError ("lstUpdateCurrent", ERROR_EMPTY_LIST);
 	}
-	else if (!lstIsEmpty(psList) && NULL == psList->psCurrent)
+	else if (!lstIsEmpty (psList) && NULL == psList->psCurrent)
 	{
 		processListError ("lstUpdateCurrent", ERROR_NO_CURRENT);
 	}
-	//incomplete
+	memcpy (psList->psCurrent->pData, pBuffer, size);
 }
 
 /**************************************************************************
@@ -314,7 +315,7 @@ void lstUpdateCurrent (ListPtr psList, const void *pBuffer,int size)
 
  Returned:			None
  *************************************************************************/
-void lstReverse(ListPtr psList)
+void lstReverse (ListPtr psList)
 {
 	//incomplete
 	//use insertbefore
@@ -336,9 +337,12 @@ void lstTerminate (ListPtr psList)
 	{
 		processListError ("lstTerminate", ERROR_NO_LIST_TERMINATE);
 	}
-	free(psList->psCurrent);
-	free(psList->psFirst);
-	free(psList->psLast);
+	psList->psCurrent = NULL;
+	free (psList->psCurrent);
+	psList->psFirst = NULL;
+	free (psList->psFirst);
+	psList->psLast = NULL;
+	free (psList->psLast);
 
 	psList = NULL;
 }
@@ -439,10 +443,11 @@ void lstNext (ListPtr psList)
 	}
 	else
 	{
-	//memcpy (psList->psCurrent, psList->psCurrent->psNext, sizeof(ListElement));
-	psList->psCurrent = psList->psCurrent->psNext;
+		if (NULL != psList->psFirst &&
+				psList->psFirst != psList->psLast &&
+				psList->psCurrent != psList->psLast);
+		psList->psCurrent = psList->psCurrent->psNext;
 	}
-
 }
 
 /**************************************************************************
@@ -474,9 +479,9 @@ void lstLast (ListPtr psList)
  Function:			lstPeek
 
  Description: 	The value of the current element is returned
- 	 	 	 	 	 	 		IMPORTANT: Do not change current
- 	 	 	 	 	 	 	  error code priority: ERROR_INVALID_LIST, ERROR_NULL_PTR,
- 	 	 	 	 	 	 	 	ERROR_EMPTY_LIST, ERROR_NO_CURRENT
+ 	 	 	 	IMPORTANT: Do not change current
+ 	 	 	 	error code priority: ERROR_INVALID_LIST, ERROR_NULL_PTR,
+ 	 	 	 	ERROR_EMPTY_LIST, ERROR_NO_CURRENT
 
  Parameters: 		psList	- pointer to list
  	 	 	 	 	 	 	 	pBuffer	- pointer to content stored in current node
@@ -503,9 +508,9 @@ void *lstPeek (const ListPtr psList, void *pBuffer, int size)
 		processListError ("lstPeek", ERROR_NO_CURRENT);
 	}
 	else
-		{
+	{
 		memcpy (pBuffer, psList->psCurrent->pData, size);
-		}
+	}
 	return pBuffer;
 }
 
@@ -545,7 +550,7 @@ void *lstPeekNext (const ListPtr psList, void *pBuffer, int size)
 	{
 		processListError ("lstPeekNext", ERROR_NO_NEXT);
 	}
-	memcpy(pBuffer, psList->psCurrent->psNext->pData, size);
+	memcpy (pBuffer, psList->psCurrent->psNext->pData, size);
 	return pBuffer;
 }
 

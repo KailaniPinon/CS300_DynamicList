@@ -125,7 +125,7 @@ bool pqueueIsEmpty (const PriorityQueuePtr psQueue)
 	{
 		processPQError("pqueueIsEmpty", ERROR_INVALID_PQ);
 	}
-	return false /*lstIsEmpty(psQueue->sTheList)*/;
+	return lstIsEmpty(&psQueue->sTheList);
 }
 
 /**************************************************************************
@@ -152,14 +152,10 @@ void pqueueEnqueue (PriorityQueuePtr psQueue, const void *pBuffer,
 	{
 		processPQError("pqueueEnqueue", ERROR_NULL_PQ_PTR);
 	}
-	//else if (SOME_MAX??? <= lstSize(psQueue->sTheList)
-	//{
-	//	processPQError("pqueueEnqueue", ERROR_FULL_PQ);
-	//}
-	else
-	{
-
-	}
+	//set to last item, add to end of line
+	lstLast(&psQueue->sTheList);
+	lstInsertAfter(&psQueue->sTheList, pBuffer, size);
+	//what does priority do?
 }
 
 /**************************************************************************
@@ -192,7 +188,9 @@ void *pqueueDequeue (PriorityQueuePtr psQueue, void *pBuffer,
 	//todo: double check make file - not linking correctly
 	else
 	{
-
+		//late night note:
+		lstFirst(&psQueue->sTheList);
+		lstDeleteCurrent(&psQueue->sTheList, pBuffer, size);
 	}
 	return pBuffer;
 }
