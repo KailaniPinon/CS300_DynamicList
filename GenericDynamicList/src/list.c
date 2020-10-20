@@ -103,7 +103,7 @@ void lstInsertAfter (ListPtr psList, const void *pBuffer, int size)
 		processListError ("lstInsertAfter", ERROR_NO_CURRENT);
 	}
 	ListElementPtr psNewListElement;
-	psNewListElement = (ListElementPtr) malloc (sizeof(ListElement));
+	psNewListElement = (ListElementPtr) malloc (sizeof(ListElement)); //VALGRIND ERRORS
 	psNewListElement->pData = malloc (size);
 	memcpy (psNewListElement->pData, pBuffer, size);
 	psNewListElement->psNext = NULL;
@@ -186,18 +186,26 @@ void *lstDeleteCurrent (ListPtr psList, void *pBuffer, int size)
 			psTempListElement = psList->psCurrent;
 			psTempListElement->psNext = psList->psCurrent->psNext;
 			lstFirst(psList);
-		do
-		{
-			lstNext(psList);
-			printf ("cn: %p, temp: %p", psList->psCurrent->psNext, psTempListElement);
-		} while (psList->psCurrent->psNext != psTempListElement);
+		//do
+		//{
+			for (int i = 0; i < psList->numElements; i++)
+			{
+				if (psList->psCurrent->psNext != psTempListElement)
+				{
+				lstNext(psList);
+				printf ("cn: %p, temp: %p", psList->psCurrent->psNext, psTempListElement);
+				}
+				else
+				{
+					//walk never completing? current->nxt never matching temp? b4 list ends?
+					puts ("WALK COMPLETE!");
+					psList->psCurrent->psNext = psTempListElement->psNext;
+					psList->psCurrent = psTempListElement->psNext;
+					free (psTempListElement);
+					psTempListElement = NULL;
+				}
+			}
 		//ISSUES HERE. LEFT OFF! FIX!
-
-		psList->psCurrent->psNext = psTempListElement->psNext;
-		psList->psCurrent = psTempListElement->psNext;
-
-		free (psTempListElement);
-		psTempListElement = NULL;
 	}
 	return pBuffer;
 }
@@ -317,8 +325,9 @@ void lstUpdateCurrent (ListPtr psList, const void *pBuffer, int size)
  *************************************************************************/
 void lstReverse (ListPtr psList)
 {
+	//todo!
 	//incomplete
-	//use insertbefore
+	//use insert before
 }
 
 /**************************************************************************
@@ -443,10 +452,11 @@ void lstNext (ListPtr psList)
 	}
 	else
 	{
-		if (NULL != psList->psFirst &&
-				psList->psFirst != psList->psLast &&
-				psList->psCurrent != psList->psLast);
-		psList->psCurrent = psList->psCurrent->psNext;
+		if (NULL != psList->psFirst && psList->psFirst != psList->psLast
+				&& psList->psCurrent != psList->psLast)
+		{
+			psList->psCurrent = psList->psCurrent->psNext;
+		}
 	}
 }
 

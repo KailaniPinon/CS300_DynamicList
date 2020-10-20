@@ -84,10 +84,22 @@ int main()
 	queueSize = pqueueSize (&sMyQueue);
 	assert (queueSize == 0, "The size of the queue is 0",
 					"The size of the queue is not 0");
+	myPriority = 2;
+	pqueueEnqueue (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
+								 myPriority);
 	myPriority = 1;
 	pqueueEnqueue (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
 								 myPriority);
+	myPriority = 0;
+	pqueueEnqueue (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
+								 myPriority);
 	pqueuePeek(&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement), &myPriority);
+	assert (0 == myPriority,
+			"'sMyPQElement->priority' match 'myPriority'.",
+			"'sMyPQElement->priority' DOESN'T match 'myPriority'.");
+
+	pqueueDequeue (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
+								 &myPriority);
 	assert (1 == myPriority,
 			"'sMyPQElement->priority' match 'myPriority'.",
 			"'sMyPQElement->priority' DOESN'T match 'myPriority'.");

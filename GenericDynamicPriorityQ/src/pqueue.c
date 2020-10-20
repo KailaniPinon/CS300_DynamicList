@@ -151,36 +151,41 @@ void pqueueEnqueue (PriorityQueuePtr psQueue, const void *pBuffer, int size,
 	{
 		processPQError ("pqueueEnqueue", ERROR_NULL_PQ_PTR);
 	}
-	//create a queue element to store priority value
+	//create a queue element to store priority and data value
 	PriorityQueueElementPtr psNewPQElement;
 	psNewPQElement = (PriorityQueueElementPtr) malloc
-									 (sizeof(PriorityQueueElement));
+									 (
+			sizeof(PriorityQueueElement));
 	psNewPQElement->pData = malloc (size);
+
+	//store appropriate arguments into new element
 	memcpy (psNewPQElement->pData, pBuffer, size);
 	psNewPQElement->priority = priority;
 
-	//create list node that stores pq element as data
-	if (pqueueIsEmpty(psQueue)) //list empty
+	if (pqueueIsEmpty (psQueue)) //list empty
 	{
-		lstInsertAfter(&psQueue->sTheList, &psNewPQElement, size);
-		lstFirst(&psQueue->sTheList); //current assigned to new node
+		lstInsertAfter (&psQueue->sTheList, &psNewPQElement, size);
+		lstFirst (&psQueue->sTheList); //current assigned to new node
 		puts ("FIRST ITEM ADDED!");
 	}
-	if (psNewPQElement->priority > priority)
+	else if (!pqueueIsEmpty (psQueue) && !lstHasNext(&psQueue->sTheList))
+	//if only 1 item, insert item after first
 	{
-		lstInsertAfter(&psQueue->sTheList, &psNewPQElement, size);
+		//unsure, but I don't think next is being updated
+		lstInsertAfter (&psQueue->sTheList, &psNewPQElement, size);
 	}
 	else
 	{
-		lstNext(&psQueue->sTheList);
+		lstFirst (&psQueue->sTheList);
+		do
+		{
+			lstNext (&psQueue->sTheList);
+
+		} while (psNewPQElement->priority > priority);
+		//zero highest priority/precedence
+
+		lstNext (&psQueue->sTheList);
 	}
-
-	//set to last item, add to end of lowest priority
-	//lstLast(&psQueue->sTheList);
-//	lstInsertAfter (&psQueue->sTheList, pBuffer, size);
-//	lstInsertAfter (&psQueue->sTheList, psNewPQElement, size);
-
-	//what does priority do?
 }
 
 /**************************************************************************
@@ -211,13 +216,8 @@ void *pqueueDequeue (PriorityQueuePtr psQueue, void *pBuffer,
 		lstFirst(&psQueue->sTheList);
 		lstDeleteCurrent(&psQueue->sTheList, pBuffer, size);
 	}
-	//element priority value -> associate with pPriority
-	//memccpy()
 	return pPriority;
 }
-
-//todo: Dequeue (NOT DONE), Peek, ChangePriority
-
 
 /**************************************************************************
  Function:			pqueuePeek
@@ -234,5 +234,32 @@ void *pqueueDequeue (PriorityQueuePtr psQueue, void *pBuffer,
 void* pqueuePeek (PriorityQueuePtr psQueue, void *pBuffer, int size,
 		 	 	 	 	 	 	 	int *priority)
 {
-	return *priority;
+	lstFirst(&psQueue->sTheList);
+	lstPeek(&psQueue->sTheList, pBuffer, size);
+	//malloc space for pqelement*, point to buffer
+	*(int*)pBuffer = *priority; //I DUNNO
+
+	return priority;
 }
+
+/**************************************************************************
+ Function:			pqueueChangePriority
+
+ Description: 	The priority of all elements is increased by the amount in
+ 	 	 	 	 	 	 	 	change error code priority: ERROR_INVALID_PQ
+
+ Parameters: 		psQueue	- pointer to priority queue
+ 	 	 	 	 	 	 	 	pBuffer - content in element
+ 	 	 	 	 	 	 	 	size		- memory size of content
+ 	 	 	 	 	 	 	 	priority-	index of element
+
+ Returned:			priority
+ *************************************************************************/
+void pqueueChangePriority (PriorityQueuePtr psQueue, int change)
+{
+	for (int i = 0; i < lstSize(&psQueue->sTheList); i++)
+	{
+			//todo: priority + change
+	}
+}
+
