@@ -143,10 +143,6 @@ bool pqueueIsEmpty (const PriorityQueuePtr psQueue)
 void pqueueEnqueue (PriorityQueuePtr psQueue, const void *pBuffer, int size,
 		int priority)
 {
-	//psQueue: queue dependent on list
-	//pBuffer: item to insert
-	//size: quantify of memory to reserve according to type of pBuffer
-	//priority: queue "importance" identifier
 	if (NULL == psQueue)
 	{
 		processPQError ("pqueueEnqueue", ERROR_INVALID_PQ);
@@ -157,30 +153,32 @@ void pqueueEnqueue (PriorityQueuePtr psQueue, const void *pBuffer, int size,
 	}
 	//create a queue element to store priority value
 	PriorityQueueElementPtr psNewPQElement;
-	psNewPQElement = (PriorityQueueElementPtr) malloc (
-			sizeof(PriorityQueueElement));
+	psNewPQElement = (PriorityQueueElementPtr) malloc
+									 (sizeof(PriorityQueueElement));
 	psNewPQElement->pData = malloc (size);
 	memcpy (psNewPQElement->pData, pBuffer, size);
+	psNewPQElement->priority = priority;
 
-	//start at front
-	lstFirst(&psQueue->sTheList);
-//	memcpy(psNewPQElement->priority, psQueue->sTheList->psCurrent->pData,
-//				sizeof(PriorityQueueElement));
-	//move current node until reaching lowest priority
-	//then insert using lstInsertAfter
+	//create list node that stores pq element as data
+	if (pqueueIsEmpty(psQueue)) //list empty
+	{
+		lstInsertAfter(&psQueue->sTheList, &psNewPQElement, size);
+		lstFirst(&psQueue->sTheList); //current assigned to new node
+		puts ("FIRST ITEM ADDED!");
+	}
 	if (psNewPQElement->priority > priority)
 	{
 		lstInsertAfter(&psQueue->sTheList, &psNewPQElement, size);
 	}
-	else if (psNewPQElement->priority < priority)
+	else
 	{
 		lstNext(&psQueue->sTheList);
 	}
 
 	//set to last item, add to end of lowest priority
 	//lstLast(&psQueue->sTheList);
-	lstInsertAfter (&psQueue->sTheList, pBuffer, size);
-	lstInsertAfter (&psQueue->sTheList, psNewPQElement, size);
+//	lstInsertAfter (&psQueue->sTheList, pBuffer, size);
+//	lstInsertAfter (&psQueue->sTheList, psNewPQElement, size);
 
 	//what does priority do?
 }
@@ -208,14 +206,8 @@ void *pqueueDequeue (PriorityQueuePtr psQueue, void *pBuffer,
 	{
 		processPQError("pqueueEnqueue", ERROR_NULL_PQ_PTR);
 	}
-	//else if (SOME_MAX??? <= lstSize(psQueue->sTheList)
-	//{
-	//	processPQError("pqueueEnqueue", ERROR_FULL_PQ);
-	//}
-	//todo: double check make file - not linking correctly
 	else
 	{
-		//late night note:
 		lstFirst(&psQueue->sTheList);
 		lstDeleteCurrent(&psQueue->sTheList, pBuffer, size);
 	}
@@ -225,3 +217,22 @@ void *pqueueDequeue (PriorityQueuePtr psQueue, void *pBuffer,
 }
 
 //todo: Dequeue (NOT DONE), Peek, ChangePriority
+
+
+/**************************************************************************
+ Function:			pqueuePeek
+
+ Description: 	Return priority value.
+
+ Parameters: 		psQueue	- pointer to priority queue
+ 	 	 	 	 	 	 	 	pBuffer - content in element
+ 	 	 	 	 	 	 	 	size		- memory size of content
+ 	 	 	 	 	 	 	 	priority-	index of element
+
+ Returned:			priority
+ *************************************************************************/
+void* pqueuePeek (PriorityQueuePtr psQueue, void *pBuffer, int size,
+		 	 	 	 	 	 	 	int *priority)
+{
+	return *priority;
+}

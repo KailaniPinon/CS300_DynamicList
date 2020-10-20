@@ -80,13 +80,17 @@ int main()
 
 	lstLoadErrorMessages ();
 	pqueueCreate (&sMyQueue);
-	//assert (&sMyQueue != NULL, "sMyList is not NULL", "sMyList is NULL");
 
 	queueSize = pqueueSize (&sMyQueue);
 	assert (queueSize == 0, "The size of the queue is 0",
-			"The size of the queue is not 0");
-myPriority = 1;
-pqueueEnqueue(&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement), myPriority);
+					"The size of the queue is not 0");
+	myPriority = 1;
+	pqueueEnqueue (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
+								 myPriority);
+	pqueuePeek(&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement), &myPriority);
+	assert (1 == myPriority,
+			"'sMyPQElement->priority' match 'myPriority'.",
+			"'sMyPQElement->priority' DOESN'T match 'myPriority'.");
 
 	puts ("TEST: END.");
 	return EXIT_SUCCESS;
