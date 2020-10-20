@@ -156,34 +156,40 @@ void pqueueEnqueue (PriorityQueuePtr psQueue, const void *pBuffer, int size,
 									 (sizeof(PriorityQueueElement));
 	psNewPQElement->pData = malloc (size);
 
+	PriorityQueueElement psNewElement;
+
 	//store appropriate arguments into new element
 	memcpy (psNewPQElement->pData, pBuffer, size);
 	psNewPQElement->priority = priority;
 
 	if (pqueueIsEmpty (psQueue)) //list empty
 	{
-		lstInsertAfter (&psQueue->sTheList, &psNewPQElement, size);
-		lstFirst (&psQueue->sTheList); //current assigned to new node
+		lstInsertAfter (&(psQueue->sTheList), &psNewPQElement, size);
+		lstFirst (&(psQueue->sTheList)); //current assigned to new node
 		puts ("FIRST ITEM ADDED!");
 	}
-	else if (!pqueueIsEmpty (psQueue) && !lstHasNext(&psQueue->sTheList))
+	else if (!(pqueueIsEmpty (psQueue)) && !lstHasNext (&(psQueue->sTheList)))
 	//if only 1 item, insert item after first
 	{
 		//unsure, but I don't think next is being updated
-		lstInsertAfter (&psQueue->sTheList, &psNewPQElement, size);
+		lstInsertAfter (&(psQueue->sTheList), &psNewPQElement, size);
 	}
 	else
 	{
-		lstFirst (&psQueue->sTheList);
+		lstFirst (&(psQueue->sTheList));
 		do
 		{
+			lstPeek(&(psQueue->sTheList), &psNewElement, sizeof(PriorityQueueElement));
+			//psNewElement.priority
+			//place element in list
 			lstNext (&psQueue->sTheList);
 
-		} while (psNewPQElement->priority > priority);
+		} while (psNewElement.priority > priority); //
 		//zero highest priority/precedence
 
 		lstNext (&psQueue->sTheList);
 	}
+	//use peek to find priority
 }
 
 /**************************************************************************

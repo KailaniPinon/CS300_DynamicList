@@ -45,6 +45,7 @@ strcpy(gszPQErrors[ERROR_EMPTY_PQ], "Error: Empty Priority Queue.");
 //*************************************************************************
 //typedef int (*cmpFunction) (const void *param1, const void *param2);
 
+
 typedef struct PriorityQueueElement
 {
 	int priority;
