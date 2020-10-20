@@ -65,7 +65,6 @@ void pqueueCreate (PriorityQueuePtr psQueue)
 	else
 	{
 		lstCreate (&psQueue->sTheList);
-		lstLoadErrorMessages ();
 	}
 }
 
@@ -154,8 +153,7 @@ void pqueueEnqueue (PriorityQueuePtr psQueue, const void *pBuffer, int size,
 	//create a queue element to store priority and data value
 	PriorityQueueElementPtr psNewPQElement;
 	psNewPQElement = (PriorityQueueElementPtr) malloc
-									 (
-			sizeof(PriorityQueueElement));
+									 (sizeof(PriorityQueueElement));
 	psNewPQElement->pData = malloc (size);
 
 	//store appropriate arguments into new element
@@ -222,7 +220,8 @@ void *pqueueDequeue (PriorityQueuePtr psQueue, void *pBuffer,
 /**************************************************************************
  Function:			pqueuePeek
 
- Description: 	Return priority value.
+ Description: 	The priority and value of the first element is returned through
+								the argument list
 
  Parameters: 		psQueue	- pointer to priority queue
  	 	 	 	 	 	 	 	pBuffer - content in element
@@ -235,11 +234,27 @@ void* pqueuePeek (PriorityQueuePtr psQueue, void *pBuffer, int size,
 		 	 	 	 	 	 	 	int *priority)
 {
 	lstFirst(&psQueue->sTheList);
+	*(int*)pBuffer = *priority; //???
 	lstPeek(&psQueue->sTheList, pBuffer, size);
 	//malloc space for pqelement*, point to buffer
-	*(int*)pBuffer = *priority; //I DUNNO
+	//FIX?
+	//how to access PriorityQueueElement inside of pBuffer inside of list?
+	//psQueue->sTheList->psCurrent->pData->priority;
 
-	return priority;
+	//So current = first
+	//Element is stored in first
+
+	//create a queue element to store priority and data value
+	PriorityQueueElementPtr psTempPQElement;
+	psTempPQElement = (PriorityQueueElementPtr) malloc
+									 (sizeof(PriorityQueueElement));
+	psTempPQElement->pData = malloc (size);
+
+	//store appropriate arguments into new element
+	memcpy (psTempPQElement->pData, pBuffer, size);
+	//psNewPQElement->priority = //priorityOfCurrent???;
+
+	return pBuffer;
 }
 
 /**************************************************************************
@@ -260,6 +275,7 @@ void pqueueChangePriority (PriorityQueuePtr psQueue, int change)
 	for (int i = 0; i < lstSize(&psQueue->sTheList); i++)
 	{
 			//todo: priority + change
+		//psQueue->//somehow access element with pointer + change;
 	}
 }
 

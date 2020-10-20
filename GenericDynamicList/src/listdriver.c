@@ -3,7 +3,7 @@
  Author:   	 	Kailani Pinon
  Date:				10.06.2020
  Class:				CS300
- Assignment:	Gerneric Lists
+ Assignment:	Generic Lists
  Purpose:			Practice implementing a singly-linked list ADT
  *************************************************************************/
 
@@ -96,7 +96,7 @@ static void printIntList (List sTheList)
 
  Parameters:	none
 
- Returned:	 	none
+ Returned:	 	EXIT_SUCCESS
  *************************************************************************/
 
 int main ()
@@ -140,6 +140,8 @@ int main ()
 
 		lstFirst (&sTheList);
 		i = 0;
+
+		//lstHasCurrent implementation error! Gets stuck here!
 		while(lstHasCurrent(&sTheList))
 		{
 			lstPeek(&sTheList, &intValue, sizeof(int));
@@ -154,11 +156,22 @@ int main ()
 			intValue = 0;
 
 			lstPeek(&sTheList, &intValue, sizeof(int));
-			if (i+1 != intValue)
+			if (i+1 == intValue)
 			{
-				assert( i+1 == intValue, "Peek returns the correct value (int)",
+				assert( i+1 != intValue, "Peek returns the correct value (int)",
 						"Peek return the incorrect value (int)");
 			}
+			//Why is assert i+1 != intValue?
+			//when intValue = 0, then 0+1 != intValue
+			//and 1 != intValue is true
+			//but assert says if 1 == intValue (which is zero) then
+			//peek is correct? Even though 1 != 0?
+			//I changed i+1 != intValue for assert, seeing as
+			//it needs to be true in order for it to even enter the
+			//if statement in the first place. But then changed back.
+			//Alternatively: if statement could have been == to
+			//possibly match assert? Confused about validation to
+			//enter if, only for contradicting assert?
 
 			++i;
 			lstNext (&sTheList);
@@ -180,7 +193,7 @@ int main ()
 		// should be 2
 		lstPeekNext(&sTheList, &intValue, sizeof(int));
 		assert(2 == intValue, "PeekNext is correct", "PeekNext is wrong");
-//ERROR HERE!
+//ERROR HERE! Peek Next incorrect
 		// delete the first element!
 		lstDeleteCurrent(&sTheList, &intValue, sizeof(int));
 

@@ -69,16 +69,19 @@ static void assert (bool bExpression, char *pTrue, char *pFalse)
 
  Parameters:	none
 
- Returned:	 	none
+ Returned:	 	EXIT_SUCCESS
  *************************************************************************/
 int main()
 {
 
 	PriorityQueue sMyQueue;
+	//todo: make a second list and test;
 	PriorityQueueElement sMyPQElement; //an item to insert to queue/list
 	int queueSize = 0, myPriority;
 
+	//only needs to load once
 	lstLoadErrorMessages ();
+	//initializes sMyQueue;
 	pqueueCreate (&sMyQueue);
 
 	queueSize = pqueueSize (&sMyQueue);
@@ -87,12 +90,18 @@ int main()
 	myPriority = 2;
 	pqueueEnqueue (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
 								 myPriority);
+	queueSize = pqueueSize (&sMyQueue);
+
 	myPriority = 1;
 	pqueueEnqueue (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
 								 myPriority);
+	queueSize = pqueueSize (&sMyQueue);
+
 	myPriority = 0;
 	pqueueEnqueue (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
 								 myPriority);
+	queueSize = pqueueSize (&sMyQueue);
+
 	pqueuePeek(&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement), &myPriority);
 	assert (0 == myPriority,
 			"'sMyPQElement->priority' match 'myPriority'.",
@@ -100,9 +109,13 @@ int main()
 
 	pqueueDequeue (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
 								 &myPriority);
-	assert (1 == myPriority,
-			"'sMyPQElement->priority' match 'myPriority'.",
-			"'sMyPQElement->priority' DOESN'T match 'myPriority'.");
+//	assert (1 == myPriority,
+//			"'sMyPQElement->priority' match 'myPriority'.",
+//			"'sMyPQElement->priority' DOESN'T match 'myPriority'.");
+
+	queueSize = pqueueSize (&sMyQueue);
+	assert (queueSize == 2, "The size of the queue is 2",
+					"The size of the queue is not 2");
 
 	puts ("TEST: END.");
 	return EXIT_SUCCESS;

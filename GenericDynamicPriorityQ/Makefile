@@ -29,8 +29,13 @@ bin/pqueuedriver.o: src/pqueuedriver.c include/pqueue.h
 	${CC} ${CFLAGS} -c src/pqueuedriver.c -o bin/pqueuedriver.o
 
 #pqueue object and dependencies, needed for executable (see line 22)
-bin/pqueue.o: src/pqueue.c include/pqueue.h
+bin/pqueue.o: src/pqueue.c include/pqueue.h \
+../GenericDynamicList/include/list.h
 	${CC} ${CFLAGS} -c src/pqueue.c -o bin/pqueue.o
+
+#rebuild list
+../GenericDynamicList/bin/list.o:
+	cd ../GenericDynamicList; make bin/list.o
 
 #for memory leak debugging in the terminal
 valgrind: bin/pqueuedriver

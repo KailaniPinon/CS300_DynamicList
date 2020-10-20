@@ -103,7 +103,7 @@ void lstInsertAfter (ListPtr psList, const void *pBuffer, int size)
 		processListError ("lstInsertAfter", ERROR_NO_CURRENT);
 	}
 	ListElementPtr psNewListElement;
-	psNewListElement = (ListElementPtr) malloc (sizeof(ListElement)); //VALGRIND ERRORS
+	psNewListElement = (ListElementPtr) malloc (sizeof(ListElement)); //VALGRIND ERROR
 	psNewListElement->pData = malloc (size);
 	memcpy (psNewListElement->pData, pBuffer, size);
 	psNewListElement->psNext = NULL;
@@ -138,8 +138,8 @@ void lstInsertAfter (ListPtr psList, const void *pBuffer, int size)
 
 //	psNewListElement->pData = NULL;
 //	free (psNewListElement->pData);
-//	psNewListElement = NULL;
-//	free (psNewListElement);
+	psNewListElement = NULL;
+	free (psNewListElement);
 }
 
 /**************************************************************************
@@ -186,14 +186,17 @@ void *lstDeleteCurrent (ListPtr psList, void *pBuffer, int size)
 			psTempListElement = psList->psCurrent;
 			psTempListElement->psNext = psList->psCurrent->psNext;
 			lstFirst(psList);
-		//do
-		//{
+
 			for (int i = 0; i < psList->numElements; i++)
 			{
 				if (psList->psCurrent->psNext != psTempListElement)
 				{
 				lstNext(psList);
-				printf ("cn: %p, temp: %p", psList->psCurrent->psNext, psTempListElement);
+				//for testing purposes (REMOVE)
+				//if cn (current next) is not present, then at end of list
+				//OR alternatively next not properly updated/implemented :(
+				puts ("lstDeleteCurrent:");
+				printf ("address cn: %p, temp: %p", psList->psCurrent->psNext, psTempListElement);
 				}
 				else
 				{
@@ -310,7 +313,17 @@ void lstUpdateCurrent (ListPtr psList, const void *pBuffer, int size)
 	{
 		processListError ("lstUpdateCurrent", ERROR_NO_CURRENT);
 	}
-	memcpy (psList->psCurrent->pData, pBuffer, size);
+	ListElementPtr psTempListElement;
+	psTempListElement = (ListElementPtr) malloc (sizeof(ListElement));
+	psTempListElement->pData = malloc (size);
+	memcpy (psTempListElement->pData, pBuffer, size);
+
+	psList->psCurrent = psTempListElement;
+
+	free (psTempListElement->pData);
+	psTempListElement->pData = NULL;
+	free (psTempListElement);
+	psTempListElement = NULL;
 }
 
 /**************************************************************************
@@ -346,13 +359,22 @@ void lstTerminate (ListPtr psList)
 	{
 		processListError ("lstTerminate", ERROR_NO_LIST_TERMINATE);
 	}
-	psList->psCurrent = NULL;
-	free (psList->psCurrent);
-	psList->psFirst = NULL;
-	free (psList->psFirst);
-	psList->psLast = NULL;
-	free (psList->psLast);
+//	psList->psCurrent = NULL;
+//	free (psList->psCurrent);
+//	psList->psFirst = NULL;
+//	free (psList->psFirst);
+//	psList->psLast = NULL;
+//	free (psList->psLast);
 
+	//can't be current? if current, then why not also first and last?
+	//not pData. Similar to reasoning from previous line? Then release
+	//for first, last, and current.
+	//not next. Same reasoning above?
+
+	//note: only 2 frees go here?
+	free (psList);
+	//free (psList);
+	//Do we literally mean a second psList free for some reason? Why
 	psList = NULL;
 }
 
@@ -453,7 +475,7 @@ void lstNext (ListPtr psList)
 	else
 	{
 		if (NULL != psList->psFirst && psList->psFirst != psList->psLast
-				&& psList->psCurrent != psList->psLast)
+				&& psList->psCurrent != psList->psLast) //if more than 1 item
 		{
 			psList->psCurrent = psList->psCurrent->psNext;
 		}
@@ -560,7 +582,11 @@ void *lstPeekNext (const ListPtr psList, void *pBuffer, int size)
 	{
 		processListError ("lstPeekNext", ERROR_NO_NEXT);
 	}
-	memcpy (pBuffer, psList->psCurrent->psNext->pData, size);
+	//pBuffer is just an address? And we want the actual content?
+	memcpy (&pBuffer, psList->psCurrent->psNext->pData, size);
+	//alternatively:
+	//tried to return ...->psNext->pData, but that doesn't update pBuffer
+	//return psList->psCurrent->psNext->pData;
 	return pBuffer;
 }
 
@@ -576,13 +602,17 @@ void *lstPeekNext (const ListPtr psList, void *pBuffer, int size)
  *************************************************************************/
 bool lstHasCurrent (const ListPtr psList)
 {
-	bool isCurrentExisting = true;
+	bool isCurrentExisting;
 
 	if (NULL == psList)
 	{
 		processListError ("lstHasCurrent", ERROR_INVALID_LIST);
 	}
-	if (NULL == psList->psCurrent)
+	if (NULL != psList->psCurrent)
+	{
+		isCurrentExisting = true;
+	}
+	else
 	{
 		isCurrentExisting = false;
 	}
@@ -601,14 +631,18 @@ bool lstHasCurrent (const ListPtr psList)
  *************************************************************************/
 bool lstHasNext (const ListPtr psList)
 {
-	bool isNextExisting = true;
+	bool isNextExisting;
 	if (NULL == psList)
 	{
 		processListError ("lstHasNext", ERROR_INVALID_LIST);
 	}
-	if (NULL == psList->psCurrent->psNext)
+	if (NULL == psList->psCurrent)
 	{
 		isNextExisting = false;
+	}
+	else
+	{
+		isNextExisting = true;
 	}
 	return isNextExisting;
 }
