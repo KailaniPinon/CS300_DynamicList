@@ -71,7 +71,7 @@ static void assert (bool bExpression, char *pTrue, char *pFalse)
 
  Returned:	 	EXIT_SUCCESS
  *************************************************************************/
-int main()
+int main ()
 {
 
 	PriorityQueue sMyQueue;
@@ -86,37 +86,53 @@ int main()
 
 	queueSize = pqueueSize (&sMyQueue);
 	assert (queueSize == 0, "The size of the queue is 0",
-					"The size of the queue is not 0");
+			"The size of the queue is not 0");
 	myPriority = 2;
 	pqueueEnqueue (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
-								 myPriority);
+			myPriority);
 	queueSize = pqueueSize (&sMyQueue);
+	assert (queueSize == 1,
+			"1 Priority Queue Element has been added to the list.",
+			"1 Priority Queue Element was not successfully added to the list.");
 
 	myPriority = 1;
 	pqueueEnqueue (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
-								 myPriority);
+			myPriority);
 	queueSize = pqueueSize (&sMyQueue);
+	assert (queueSize == 2,
+			"2nd Priority Queue Element has been added to the list.",
+			"2nd Priority Queue Element was not successfully added to the list.");
 
 	myPriority = 0;
 	pqueueEnqueue (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
-								 myPriority);
+			myPriority);
 	queueSize = pqueueSize (&sMyQueue);
 
-	pqueuePeek(&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement), &myPriority);
-	assert (0 == myPriority,
-			"'sMyPQElement->priority' match 'myPriority'.",
-			"'sMyPQElement->priority' DOESN'T match 'myPriority'.");
+	pqueuePeek (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
+			&myPriority);
+	assert (0 == myPriority, //valgrind error: use of uninitialized value
+	"Priority is 0.", "Priority isn't 0.");
 
+	//lstFirst(&(sMyQueue.sTheList));
+	assert (2 == myPriority, //valgrind error: use of uninitialized value
+	"First item in list is now current. Priority is 2.",
+			"First item in list did not change to current. Priority is NOT 2.");
+
+	//BREAKS HERE//
+
+	//I don't think dequeue is working either - todo: fix???
 	pqueueDequeue (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
-								 &myPriority);
-//	assert (1 == myPriority,
-//			"'sMyPQElement->priority' match 'myPriority'.",
-//			"'sMyPQElement->priority' DOESN'T match 'myPriority'.");
+			&myPriority);
+	assert (1 == myPriority, "'sMyPQElement->priority' match 'myPriority'.",
+			"'sMyPQElement->priority' DOESN'T match 'myPriority'.");
 
 	queueSize = pqueueSize (&sMyQueue);
 	assert (queueSize == 2, "The size of the queue is 2",
-					"The size of the queue is not 2");
+			"The size of the queue is not 2");
 
+	//pqueueTerminate(&(sMyQueue->sTheList));
+	//error: invalid type argument
+	//
 	puts ("TEST: END.");
 	return EXIT_SUCCESS;
 }

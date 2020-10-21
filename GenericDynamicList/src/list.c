@@ -196,7 +196,7 @@ void *lstDeleteCurrent (ListPtr psList, void *pBuffer, int size)
 				//if cn (current next) is not present, then at end of list
 				//OR alternatively next not properly updated/implemented :(
 				puts ("lstDeleteCurrent:");
-				printf ("address cn: %p, temp: %p", psList->psCurrent->psNext, psTempListElement);
+				printf ("address of next: %p\naddress of temp: %p\n", psList->psCurrent->psNext, psTempListElement);
 				}
 				else
 				{
@@ -443,6 +443,7 @@ void lstFirst (ListPtr psList)
 	{
 		processListError ("lstFirst", ERROR_EMPTY_LIST);
 	}
+	//not adding anything new: just setting address of current to first
 	psList->psCurrent = psList->psFirst;
 }
 
@@ -636,7 +637,7 @@ bool lstHasNext (const ListPtr psList)
 	{
 		processListError ("lstHasNext", ERROR_INVALID_LIST);
 	}
-	if (NULL == psList->psCurrent)
+	if (NULL == psList->psCurrent->psNext)
 	{
 		isNextExisting = false;
 	}
