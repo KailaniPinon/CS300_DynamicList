@@ -24,8 +24,7 @@ bin:
 	mkdir -p bin
 
 #Create listdriver
-bin/listdriver: bin/listdriver.o \
-bin/list.o
+bin/listdriver: bin/listdriver.o bin/list.o
 	${CC} ${CFLAGS} -o bin/listdriver bin/listdriver.o \
 	bin/list.o
 
