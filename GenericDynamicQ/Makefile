@@ -35,7 +35,7 @@ bin/queuedriver.o: src/queuedriver.c include/queue.h \
 ../GenericDynamicPriorityQ/include/pqueue.h \
 ../GenericDynamicList/include/list.h
 	${CC} ${CFLAGS} -c src/queuedriver.c -o bin/queuedriver.o
-	
+#get rid of src (.c)	
 #dependencies objects
 bin/pqueue.o: ../GenericDynamicPriorityQ/src/pqueue.c \
 ../GenericDynamicPriorityQ/src/pqueue.c \

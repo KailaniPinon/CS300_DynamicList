@@ -1,5 +1,5 @@
 /**************************************************************************
- File name:		list.c
+ File name:			list.c
  Author:        Kailani Pinon
  Date:          10.05.2020
  Class:         CS300
@@ -31,6 +31,76 @@ static void processListError (const char *pszFunctionName, int errorCode)
 	exit (EXIT_FAILURE);
 }
 
+//*************************************************************************
+// Allocation and Deallocation
+//*************************************************************************
+/**************************************************************************
+ Function:			lstCreate
+
+ Description: 	If the list can be created, then the list exists and is
+ 	 	 						empty; otherwise, ERROR_NO_LIST_CREATE if psList is NULL.
+
+ Parameters: 		psList	- pointer to list
+
+ Returned:			None
+ *************************************************************************/
+void lstCreate (ListPtr psList)
+{
+	if (NULL == psList)
+	{
+		processListError ("lstCreate", ERROR_NO_LIST_CREATE);
+	}
+	else
+	{
+		//INITIALIZE (SPECIFY) VALUES IN LIST
+		//set list as empty (0)
+		psList->numElements = 0;		//line 73 list.h
+		//set nodes to NULL
+		psList->psCurrent = NULL; 	//line 72 list.h
+		psList->psFirst = NULL;			//line 71 list.h
+		psList->psLast = NULL;			//line 70 list.h
+	}
+}
+
+/**************************************************************************
+ Function:			lstTerminate
+
+ Description: 	If the list can be terminated, then the list no longer
+ 	 	 	 	 	 	 	 	exists and is empty; Free() data	pointed	to	void* and
+ 	 	 	 	 	 	 	 	the	ListElements. Otherwise: ERROR_NO_LIST_TERMINATE.
+
+ Parameters: 		psList	- pointer to list
+
+ Returned:			None
+ *************************************************************************/
+void lstTerminate (ListPtr psList)
+{
+	if (NULL == psList)
+	{
+		processListError ("lstTerminate", ERROR_NO_LIST_TERMINATE);
+	}
+	//use placeholder to assist with pointing at addresses of items
+	ListElementPtr psTempElement;
+
+	//start from the first item
+	psTempElement = psList->psFirst;
+
+	//walk through the list, removing all items
+	while (NULL != psTempElement && !lstIsEmpty(psList))
+	{
+		psList->psFirst = psTempElement->psNext;
+
+		free (psTempElement->pData);
+		free (psTempElement);
+
+		psTempElement = psList->psFirst;
+		psList->numElements--;
+	}
+	psList->psCurrent = NULL;
+	psList->psFirst = NULL;
+	psList->psLast = NULL;
+}
+
 /**************************************************************************
  Function:			lstLoadErrorMessages
 
@@ -47,31 +117,307 @@ void lstLoadErrorMessages ()
 	LOAD_LIST_ERRORS
 }
 
+//*************************************************************************
+// Checking number of elements in list
+//*************************************************************************
 /**************************************************************************
- Function:			lstCreate
+ Function:			lstSize
 
- Description: 	If the list can be created, then the list exists and is
- 	 	 						empty; otherwise, ERROR_NO_LIST_CREATE if psList is NULL.
+ Description: 	Returns the number of elements in the list
+ 	 	 	 	 	 	 		error code priority: ERROR_INVALID_LIST
+
+ Parameters: 		psList	- pointer to list
+
+ Returned:			psList->numElements
+ *************************************************************************/
+int lstSize (const ListPtr psList)
+{
+	if (NULL == psList)
+	{
+		processListError ("1stSize", ERROR_INVALID_LIST);
+	}
+	return psList->numElements;
+}
+
+/**************************************************************************
+ Function:			lstIsEmpty
+
+ Description: 	If list is empty, return true; otherwise, return false.
+								error code priority: ERROR_INVALID_LIST
+
+ Parameters: 		psList	- pointer to list
+
+ Returned:			bIsEmpty - determines any items are present in the list
+ *************************************************************************/
+bool lstIsEmpty (const ListPtr psList)
+{
+	const int EMPTY_LIST = 0;
+	bool bIsEmpty;
+
+	if (NULL == psList)
+	{
+		processListError ("lstIsEmpty", ERROR_INVALID_LIST);
+	}
+	else if (EMPTY_LIST == psList->numElements)
+	{
+		bIsEmpty = true;
+	}
+	else
+	{
+		bIsEmpty = false;
+	}
+	return bIsEmpty;
+}
+
+//*************************************************************************
+//												List Testing
+//*************************************************************************
+/**************************************************************************
+ Function:			lstHasCurrent
+
+ Description: 	Returns true if the current node is not NULL; otherwise,
+ 	 	 	 	 	 	 	 	false is returned
+
+ Parameters: 		psList	- pointer to list
+
+ Returned:			bDoesCurrentExist
+ *************************************************************************/
+bool lstHasCurrent (const ListPtr psList)
+{
+	bool bDoesCurrentExist;
+
+	if (NULL == psList)
+	{
+		processListError ("lstHasCurrent", ERROR_INVALID_LIST);
+	}
+	if (NULL != psList->psCurrent)
+	{
+		bDoesCurrentExist = true;
+	}
+	else
+	{
+		bDoesCurrentExist = false;
+	}
+	return bDoesCurrentExist;
+}
+
+/**************************************************************************
+ Function:			lstHasNext
+
+ Description: 	Returns true if the current node has a successor;
+ 	 	 	 	 	 	 	 	otherwise, false is returned
+
+ Parameters: 		psList	- pointer to list
+
+ Returned:			bDoesNextExist
+ *************************************************************************/
+bool lstHasNext (const ListPtr psList)
+{
+	bool bDoesNextExist;
+
+	if (NULL == psList)
+	{
+		processListError ("lstHasNext", ERROR_INVALID_LIST);
+	}
+	else if (NULL != psList->psCurrent && NULL != psList->psCurrent->psNext)
+	{
+		bDoesNextExist = true;
+	}
+	else
+	{
+		bDoesNextExist = false;
+	}
+	return bDoesNextExist;
+}
+
+//*************************************************************************
+//													Peek Operations
+//*************************************************************************
+/**************************************************************************
+ Function:			lstPeek
+
+ Description: 	The value of the current element is returned
+ 	 	 	 	IMPORTANT: Do not change current
+ 	 	 	 	error code priority: ERROR_INVALID_LIST, ERROR_NULL_PTR,
+ 	 	 	 	ERROR_EMPTY_LIST, ERROR_NO_CURRENT
+
+ Parameters: 		psList	- pointer to list
+ 	 	 	 	 	 	 	 	pBuffer	- pointer to content stored in current node
+								size		- size requested to malloc
+
+ Returned:			pBuffer
+ *************************************************************************/
+void *lstPeek (const ListPtr psList, void *pBuffer, int size)
+{
+	if (NULL == psList)
+	{
+		processListError ("lstPeek", ERROR_INVALID_LIST);
+	}
+	else if (NULL == pBuffer)
+	{
+		processListError ("lstPeek", ERROR_NULL_PTR);
+	}
+	else if (lstIsEmpty (psList))
+	{
+		processListError ("lstPeek", ERROR_EMPTY_LIST);
+	}
+	else if (!lstIsEmpty (psList) && NULL == psList->psCurrent)
+	{
+		processListError ("lstPeek", ERROR_NO_CURRENT);
+	}
+	else
+	{
+		memcpy (pBuffer, psList->psCurrent->pData, size);
+	}
+	return pBuffer;
+}
+
+/**************************************************************************
+ Function:			lstPeekNext
+
+ Description: 	The data value of current's successor is returned
+ 	 	 	 	 	 	 	 	IMPORTANT: Do not change current
+ 	 	 	 	 	 	 	 	error code priority: ERROR_INVALID_LIST, ERROR_NULL_PTR,
+								ERROR_EMPTY_LIST, ERROR_NO_CURRENT
+
+ Parameters: 		psList	- pointer to list
+ 	 	 	 	 	 	 		pBuffer - pointer to content stored in current node
+ 	 	 	 	 	 	 		size		- size requested to malloc
+
+ Returned:			pBuffer
+ *************************************************************************/
+void *lstPeekNext (const ListPtr psList, void *pBuffer, int size)
+{
+	if (NULL == psList)
+	{
+		processListError ("lstPeekNext", ERROR_INVALID_LIST);
+	}
+	else if (NULL == pBuffer)
+	{
+		processListError ("lstPeekNext", ERROR_NULL_PTR);
+	}
+	else if (lstIsEmpty (psList))
+	{
+		processListError ("lstPeekNext", ERROR_EMPTY_LIST);
+	}
+	else if (NULL == psList->psCurrent)
+	{
+		processListError ("lstPeekNext", ERROR_NO_CURRENT);
+	}
+	else if (NULL == psList->psCurrent->psNext)
+	{
+		processListError ("lstPeekNext", ERROR_NO_NEXT);
+	}
+	else
+	{
+		memcpy (pBuffer, psList->psCurrent->psNext->pData, size);
+	}
+	return pBuffer;
+}
+
+//*************************************************************************
+//							Updating current
+//*************************************************************************
+/**************************************************************************
+ Function:			lstFirst
+
+ Description: 	If the list is not empty, current is changed to the first
+ 	 	 	 	 	 	 	 	element error code priority: ERROR_INVALID_LIST,
+ 	 	 	 	 	 	 	 	ERROR_EMPTY_LIST
 
  Parameters: 		psList	- pointer to list
 
  Returned:			None
  *************************************************************************/
-void lstCreate (ListPtr psList)
+void lstFirst (ListPtr psList)
 {
-	//if psList is null, then process and print error
-	//otherwise don't do anything else
 	if (NULL == psList)
 	{
-		processListError ("lstCreate", ERROR_NO_LIST_CREATE);
+		processListError ("lstFirst", ERROR_INVALID_LIST);
 	}
-	//Completely new list. Set size to zero.
-	psList->numElements = 0;
-	psList->psCurrent = NULL;
-	psList->psFirst = NULL;
-	psList->psLast = NULL;
+	else if (lstIsEmpty (psList))
+	{
+		processListError ("lstFirst", ERROR_EMPTY_LIST);
+	}
+	//not adding anything new: just setting address of current to first
+	psList->psCurrent = psList->psFirst;
+	//puts ("Current switched to first!");
 }
 
+/**************************************************************************
+ Function:			lstNext
+
+ Description: 	If the list is not empty, current is changed to the
+								successor of the current element
+           	 	 	error code priority: ERROR_INVALID_LIST,
+								ERROR_EMPTY_LIST, ERROR_NO_CURRENT
+
+ Parameters: 		psList	- pointer to list
+
+ Returned:			None
+ *************************************************************************/
+void lstNext (ListPtr psList)
+{
+	if (NULL == psList)
+	{
+		processListError ("lstNext", ERROR_INVALID_LIST);
+	}
+	else if (lstIsEmpty (psList))
+	{
+		processListError ("lstNext", ERROR_EMPTY_LIST);
+	}
+	else if (NULL == psList->psCurrent)
+	{
+		processListError ("lstNext", ERROR_NO_CURRENT);
+	}
+	else
+	{
+		if (true == lstHasNext (psList))
+		{
+			psList->psCurrent = psList->psCurrent->psNext;
+			//puts ("Current switched to next!");
+		}
+		else
+		{
+			psList->psCurrent->psNext = NULL;
+			psList->psCurrent = NULL;
+			//printf ("Whoopsies! Current extended past Last. Current is now NULL.\n"); //QUIT?
+		}
+	}
+}
+
+/**************************************************************************
+ Function:			lstLast
+
+ Description: 	If the list is not empty, current is changed to last
+								if it exists
+          			error code priority: ERROR_INVALID_LIST,
+								ERROR_EMPTY_LIST
+
+ Parameters: 		psList	- pointer to list
+
+ Returned:			None
+ *************************************************************************/
+void lstLast (ListPtr psList)
+{
+	if (NULL == psList)
+	{
+		processListError ("lstLast", ERROR_INVALID_LIST);
+	}
+	else if (true == lstIsEmpty (psList))
+	{
+		processListError ("lastLast", ERROR_EMPTY_LIST);
+	}
+	else
+	{
+		psList->psCurrent = psList->psLast;
+		//puts ("Current switched to last!");
+	}
+}
+
+//*************************************************************************
+//									Insertion, Deletion, and Updating
+//*************************************************************************
 /**************************************************************************
  Function:			lstInsertAfter
 
@@ -102,44 +448,52 @@ void lstInsertAfter (ListPtr psList, const void *pBuffer, int size)
 	{
 		processListError ("lstInsertAfter", ERROR_NO_CURRENT);
 	}
-	ListElementPtr psNewListElement;
-	psNewListElement = (ListElementPtr) malloc (sizeof(ListElement)); //VALGRIND ERROR
-	psNewListElement->pData = malloc (size);
-	memcpy (psNewListElement->pData, pBuffer, size);
-	psNewListElement->psNext = NULL;
+	else
+	{
+		//new space for brand new element to insert
+		ListElementPtr psNewListElement;
+		psNewListElement = (ListElementPtr) malloc (sizeof(*psNewListElement));
+		psNewListElement->pData = malloc (size);
+		memcpy (psNewListElement->pData, pBuffer, size);
+		psNewListElement->psNext = NULL;
 
-	if (NULL == psList->psFirst) //if empty
-	{
-		psList->psCurrent = psNewListElement;
-		psList->psFirst = psList->psCurrent ;
-		psList->psLast = psList->psCurrent ;
-	}
-	else if (psList->psFirst == psList->psLast) //if only 1 item
-	{
-		psList->psFirst->psNext = psNewListElement;
-		psList->psCurrent = psNewListElement;
-		psList->psLast = psList->psCurrent;
-	}
-	else //if more than 2 items
-	{
-		if (psList->psCurrent == psList->psLast)
+		if (!lstHasCurrent (psList)) //if empty
 		{
-			psList->psCurrent = psNewListElement;
-			psList->psLast->psNext = psList->psCurrent;
+			psList->psCurrent = psList->psFirst = psList->psLast = psNewListElement;
+			//puts ("INSERTING FIRST ITEM INTO LIST!");
 		}
-		else
+		else if (psList->psFirst == psList->psLast && false == lstHasNext(psList)) //if only 1 item
 		{
-			psNewListElement->psNext = psList->psCurrent->psNext;
-			psList->psCurrent->psNext = psNewListElement;
-			psList->psCurrent = psNewListElement;
+			//point first to new item
+			//set current and last to new item
+			psList->psFirst->psNext = psList->psLast = psList->psCurrent = psNewListElement;
+			//puts ("INSERTING 2ND ITEM INTO LIST!");
 		}
+		else //if more than 2 items
+		{
+			if (psList->psCurrent == psList->psLast)
+			{
+				//point current to new item
+				//set current and last to new item
+				psList->psCurrent->psNext = psNewListElement;
+				psList->psCurrent = psList->psLast = psNewListElement;
+				//first untouched
+			}
+			else if (psList->psCurrent == psList->psFirst)
+			{
+				psNewListElement->psNext = psList->psFirst->psNext;
+				psList->psFirst->psNext = psNewListElement;
+				psList->psCurrent = psNewListElement;
+			}
+			else //if starting in middle
+			{
+				psNewListElement->psNext = psList->psCurrent->psNext;
+				psList->psCurrent->psNext = psNewListElement;
+				psList->psCurrent = psNewListElement;
+			}
+		}
+		psList->numElements++;
 	}
-	psList->numElements++;
-
-//	psNewListElement->pData = NULL;
-//	free (psNewListElement->pData);
-	psNewListElement = NULL;
-	free (psNewListElement);
 }
 
 /**************************************************************************
@@ -179,37 +533,101 @@ void *lstDeleteCurrent (ListPtr psList, void *pBuffer, int size)
 	}
 	else
 	{
-		printf ("current: %p\n", psList->psCurrent);
+		ListElementPtr psTempListElement;
+		psTempListElement = (ListElementPtr) malloc (sizeof(ListElement));
+		psTempListElement = psList->psCurrent;
+		psTempListElement->psNext = psList->psCurrent->psNext;
+		lstFirst (psList);
 
-			ListElementPtr psTempListElement;
-			psTempListElement = (ListElementPtr) malloc (sizeof(ListElement));
-			psTempListElement = psList->psCurrent;
-			psTempListElement->psNext = psList->psCurrent->psNext;
-			lstFirst(psList);
+		puts ("ATTEMPTING TO REMOVE CURRENT");
 
-			for (int i = 0; i < psList->numElements; i++)
+			if (psList->psFirst == psList->psLast) //if only 1 item
 			{
-				if (psList->psCurrent->psNext != psTempListElement)
-				{
-				lstNext(psList);
-				//for testing purposes (REMOVE)
-				//if cn (current next) is not present, then at end of list
-				//OR alternatively next not properly updated/implemented :(
-				puts ("lstDeleteCurrent:");
-				printf ("address of next: %p\naddress of temp: %p\n", psList->psCurrent->psNext, psTempListElement);
-				}
-				else
-				{
-					//walk never completing? current->nxt never matching temp? b4 list ends?
-					puts ("WALK COMPLETE!");
-					psList->psCurrent->psNext = psTempListElement->psNext;
-					psList->psCurrent = psTempListElement->psNext;
-					free (psTempListElement);
-					psTempListElement = NULL;
-				}
+				//remove the only element
+				//free(psList->psCurrent->pData);
+				//free(psList->psCurrent);
+				psList->psCurrent->pData = NULL;
+				psList->psCurrent = NULL;
+				psList->psFirst->pData = NULL;
+				psList->psFirst = NULL;
+				psList->psLast->pData = NULL;
+				psList->psLast = NULL;
 			}
+			else if (psList->psCurrent == psList->psLast &&
+							 psList->psLast != psList->psFirst) //if at end of list
+		{
+			//use placeholder to assist with pointing at addresses of items
+			//ListElementPtr psTempElement;
+			psTempListElement = psList->psLast;
+
+			//start from the first item
+			lstFirst (psList);
+
+			//walk to element that precedes last
+			do
+			{
+				lstNext (psList);
+			} while (psList->psCurrent->psNext != NULL);
+
+			//set last to current
+			psList->psLast = psList->psCurrent;
+
+			//safeguard and erase address associations with initial last
+			free (psTempListElement->pData);
+			free (psTempListElement);
+			psTempListElement = NULL;
+		}
+		else if (psList->psCurrent == psList->psFirst &&
+						 NULL != psList->psFirst->psNext) //if first->next exists
+		{
+			//use placeholder to assist with pointing at addresses of items
+			//ListElementPtr psTempElement;
+			psTempListElement = psList->psFirst;
+
+			//move to item proceeding first
+			lstNext (psList);
+
+			//set current to first
+			psList->psFirst = psList->psCurrent;
+			//free (psTempListElement->pData);
+			//free (psTempListElement->psNext);
+			//free (psTempListElement);
+			psTempListElement->pData = NULL;
+			psTempListElement->psNext = NULL;
+			psTempListElement = NULL;
+		}
+		else //if starting in middle
+		{
+			//use placeholder to assist with pointing at addresses of items
+			//ListElementPtr psTempElement;
+			psTempListElement = psList->psCurrent;
+
+			//walk to element that precedes last, but start from beginning
+			lstFirst (psList);
+
+			do
+			{
+				lstNext (psList);
+			} while (psList->psCurrent->psNext != psTempListElement);
+
+			//connect current's preceding element with current's proceeding element
+			psList->psCurrent->psNext = psTempListElement->psNext;
+
+			//free (psTempListElement->pData);
+			//free (psTempListElement->psNext);
+			//free (psTempListElement);
+			psTempListElement->pData = NULL;
+			psTempListElement->psNext = NULL;
+			psTempListElement = NULL;
+		}
 		//ISSUES HERE. LEFT OFF! FIX!
 	}
+	//reduce list size count by 1
+	//ONLY 2 FREES!
+	//see trello for copy paste of part B grading rubric!
+	//TODO: THIS IS WHERE I LEFT OFF. MAKE SURE MIDDLE DELETE UPDATES PROPERLY!
+	//checking if new current is the item proceeding initial current
+	--(psList->numElements);
 	return pBuffer;
 }
 
@@ -239,7 +657,7 @@ void lstInsertBefore (ListPtr psList, const void *pBuffer, int size)
 	{
 		processListError ("lstInsertBefore", ERROR_NULL_PTR);
 	}
-	else if (!lstIsEmpty (psList) && NULL == psList->psCurrent)
+	else if (lstIsEmpty (psList) && NULL == psList->psCurrent)
 	{
 		processListError ("lstInsertBefore", ERROR_NO_CURRENT);
 	}
@@ -285,7 +703,8 @@ void lstInsertBefore (ListPtr psList, const void *pBuffer, int size)
 /**************************************************************************
  Function:			lstUpdateCurrent
 
- Description: 	The value of pBuffer is copied into the current element
+ Description: 	The value of pBuffer is copied into the current element.
+ 	 	 	 	 	 	 	 	A new value writes over previous data information.
             		error code priority: ERROR_INVALID_LIST, ERROR_NULL_PTR,
 					      ERROR_EMPTY_LIST, ERROR_NO_CURRENT
 
@@ -313,17 +732,21 @@ void lstUpdateCurrent (ListPtr psList, const void *pBuffer, int size)
 	{
 		processListError ("lstUpdateCurrent", ERROR_NO_CURRENT);
 	}
-	ListElementPtr psTempListElement;
-	psTempListElement = (ListElementPtr) malloc (sizeof(ListElement));
-	psTempListElement->pData = malloc (size);
-	memcpy (psTempListElement->pData, pBuffer, size);
+	else
+	{
+		//free current data information that we want to overwrite
+		free (psList->psCurrent->pData); //valgrind errors: invalid read of size 2
 
-	psList->psCurrent = psTempListElement;
+		//re-allocate space for new pData
+		ListElementPtr psTempListElement;
+		psTempListElement = (ListElementPtr) malloc (sizeof(ListElement)); //valgrind error 400 bytes lost
+		psTempListElement->pData = malloc (size);
+		memcpy (psTempListElement->pData, pBuffer, size);
 
-	free (psTempListElement->pData);
-	psTempListElement->pData = NULL;
-	free (psTempListElement);
-	psTempListElement = NULL;
+		//set pData to new element
+		memcpy(psList->psCurrent->pData, psTempListElement->pData, size); //valgrind error invalid write of size 2
+	}
+
 }
 
 /**************************************************************************
@@ -343,307 +766,3 @@ void lstReverse (ListPtr psList)
 	//use insert before
 }
 
-/**************************************************************************
- Function:			lstTerminate
-
- Description: 	If the list can be terminated, then the list no longer
- 	 	 	 	 	 	 	 	exists and is empty; otherwise, ERROR_NO_LIST_TERMINATE
-
- Parameters: 		psList	- pointer to list
-
- Returned:			None
- *************************************************************************/
-void lstTerminate (ListPtr psList)
-{
-	if (NULL == psList)
-	{
-		processListError ("lstTerminate", ERROR_NO_LIST_TERMINATE);
-	}
-//	psList->psCurrent = NULL;
-//	free (psList->psCurrent);
-//	psList->psFirst = NULL;
-//	free (psList->psFirst);
-//	psList->psLast = NULL;
-//	free (psList->psLast);
-
-	//can't be current? if current, then why not also first and last?
-	//not pData. Similar to reasoning from previous line? Then release
-	//for first, last, and current.
-	//not next. Same reasoning above?
-
-	//note: only 2 frees go here?
-	free (psList);
-	//free (psList);
-	//Do we literally mean a second psList free for some reason? Why
-	psList = NULL;
-}
-
-/**************************************************************************
- Function:			lstSize
-
- Description: 	Returns the number of elements in the list
- 	 	 	 	 	 	 		error code priority: ERROR_INVALID_LIST
-
- Parameters: 		psList	- pointer to list
-
- Returned:			size (length) of the list
- *************************************************************************/
-int lstSize (const ListPtr psList)
-{
-	if (NULL == psList)
-	{
-		processListError ("1stSize", ERROR_INVALID_LIST);
-	}
-	return psList->numElements;
-}
-
-/**************************************************************************
- Function:			lstIsEmpty
-
- Description: 	If list is empty, return true; otherwise, return false.
-								error code priority: ERROR_INVALID_LIST
-
- Parameters: 		psList	- pointer to list
-
- Returned:			isEmpty - determines if psList is NULL or not
- *************************************************************************/
-bool lstIsEmpty (const ListPtr psList)
-{
-	bool isEmpty = false;
-	const int EMPTY_LIST = 0;
-	if (NULL == psList)
-	{
-		processListError ("lstIsEmpty", ERROR_INVALID_LIST);
-	}
-	else if (EMPTY_LIST == psList->numElements)
-	{
-		isEmpty = true;
-	}
-	return isEmpty;
-}
-
-/**************************************************************************
- Function:			lstFirst
-
- Description: 	If the list is not empty, current is changed to the first
- 	 	 	 	 	 	 	 	element error code priority: ERROR_INVALID_LIST,
- 	 	 	 	 	 	 	 	ERROR_EMPTY_LIST
-
- Parameters: 		psList	- pointer to list
-
- Returned:			None
- *************************************************************************/
-void lstFirst (ListPtr psList)
-{
-	if (NULL == psList)
-	{
-		processListError ("lstFirst", ERROR_INVALID_LIST);
-	}
-	else if (lstIsEmpty (psList))
-	{
-		processListError ("lstFirst", ERROR_EMPTY_LIST);
-	}
-	//not adding anything new: just setting address of current to first
-	psList->psCurrent = psList->psFirst;
-}
-
-/**************************************************************************
- Function:			lstNext
-
- Description: 	If the list is not empty, current is changed to the
-								successor of the current element
-           	 	 	error code priority: ERROR_INVALID_LIST,
-								ERROR_EMPTY_LIST, ERROR_NO_CURRENT
-
- Parameters: 		psList	- pointer to list
-
- Returned:			None
- *************************************************************************/
-void lstNext (ListPtr psList)
-{
-	if (NULL == psList)
-	{
-		processListError ("lstNext", ERROR_INVALID_LIST);
-	}
-	else if (lstIsEmpty (psList))
-	{
-		processListError ("lstNext", ERROR_EMPTY_LIST);
-	}
-	else if (NULL == psList->psCurrent)
-	{
-		processListError ("lstNext", ERROR_NO_CURRENT);
-	}
-	else
-	{
-		if (NULL != psList->psFirst && psList->psFirst != psList->psLast
-				&& psList->psCurrent != psList->psLast) //if more than 1 item
-		{
-			psList->psCurrent = psList->psCurrent->psNext;
-		}
-	}
-}
-
-/**************************************************************************
- Function:			lstLast
-
- Description: 	If the list is not empty, current is changed to last
-								if it exists
-          			error code priority: ERROR_INVALID_LIST,
-								ERROR_EMPTY_LIST
-
- Parameters: 		psList	- pointer to list
-
- Returned:			None
- *************************************************************************/
-void lstLast (ListPtr psList)
-{
-	if (NULL == psList)
-	{
-		processListError ("lstLast", ERROR_INVALID_LIST);
-	}
-	if (lstIsEmpty (psList))
-	{
-		processListError ("lastLast", ERROR_EMPTY_LIST);
-	}
-	psList->psCurrent = psList->psLast;
-}
-
-/**************************************************************************
- Function:			lstPeek
-
- Description: 	The value of the current element is returned
- 	 	 	 	IMPORTANT: Do not change current
- 	 	 	 	error code priority: ERROR_INVALID_LIST, ERROR_NULL_PTR,
- 	 	 	 	ERROR_EMPTY_LIST, ERROR_NO_CURRENT
-
- Parameters: 		psList	- pointer to list
- 	 	 	 	 	 	 	 	pBuffer	- pointer to content stored in current node
-								size		- size requested to malloc
-
- Returned:			pBuffer
- *************************************************************************/
-void *lstPeek (const ListPtr psList, void *pBuffer, int size)
-{
-	if (NULL == psList)
-	{
-		processListError ("lstPeek", ERROR_INVALID_LIST);
-	}
-	else if (NULL == pBuffer)
-	{
-		processListError ("lstPeek", ERROR_NULL_PTR);
-	}
-	else if (lstIsEmpty (psList))
-	{
-		processListError ("lstPeek", ERROR_EMPTY_LIST);
-	}
-	else if (!lstIsEmpty (psList) && NULL == psList->psCurrent)
-	{
-		processListError ("lstPeek", ERROR_NO_CURRENT);
-	}
-	else
-	{
-		memcpy (pBuffer, psList->psCurrent->pData, size);
-	}
-	return pBuffer;
-}
-
-/**************************************************************************
- Function:			lstPeekNext
-
- Description: 	The value of the current element is returned
- 	 	 	 	 	 	 	 	IMPORTANT: Do not change current
- 	 	 	 	 	 	 	 	error code priority: ERROR_INVALID_LIST, ERROR_NULL_PTR,
-								ERROR_EMPTY_LIST, ERROR_NO_CURRENT
-
- Parameters: 		psList	- pointer to list
- 	 	 	 	 	 	 		pBuffer - pointer to content stored in current node
- 	 	 	 	 	 	 		size		- size requested to malloc
-
- Returned:			pBuffer
- *************************************************************************/
-void *lstPeekNext (const ListPtr psList, void *pBuffer, int size)
-{
-	if (NULL == psList)
-	{
-		processListError ("lstPeekNext", ERROR_INVALID_LIST);
-	}
-	if (NULL == pBuffer)
-	{
-		processListError ("lstPeekNext", ERROR_NULL_PTR);
-	}
-	if (lstIsEmpty (psList))
-	{
-		processListError ("lstPeekNext", ERROR_EMPTY_LIST);
-	}
-	if (NULL == psList->psCurrent)
-	{
-		processListError ("lstPeekNext", ERROR_NO_CURRENT);
-	}
-	if (NULL == psList->psCurrent->psNext)
-	{
-		processListError ("lstPeekNext", ERROR_NO_NEXT);
-	}
-	//pBuffer is just an address? And we want the actual content?
-	memcpy (&pBuffer, psList->psCurrent->psNext->pData, size);
-	//alternatively:
-	//tried to return ...->psNext->pData, but that doesn't update pBuffer
-	//return psList->psCurrent->psNext->pData;
-	return pBuffer;
-}
-
-/**************************************************************************
- Function:			lstHasCurrent
-
- Description: 	Returns true if the current node is not NULL; otherwise,
- 	 	 	 	 	 	 	 	false is returned
-
- Parameters: 		psList	- pointer to list
-
- Returned:			pBuffer
- *************************************************************************/
-bool lstHasCurrent (const ListPtr psList)
-{
-	bool isCurrentExisting;
-
-	if (NULL == psList)
-	{
-		processListError ("lstHasCurrent", ERROR_INVALID_LIST);
-	}
-	if (NULL != psList->psCurrent)
-	{
-		isCurrentExisting = true;
-	}
-	else
-	{
-		isCurrentExisting = false;
-	}
-	return isCurrentExisting;
-}
-
-/**************************************************************************
- Function:			lstHasNext
-
- Description: 	Returns true if the current node is not NULL; otherwise,
- 	 	 	 	 	 	 	 	false is returned
-
- Parameters: 		psList	- pointer to list
-
- Returned:			pBuffer
- *************************************************************************/
-bool lstHasNext (const ListPtr psList)
-{
-	bool isNextExisting;
-	if (NULL == psList)
-	{
-		processListError ("lstHasNext", ERROR_INVALID_LIST);
-	}
-	if (NULL == psList->psCurrent->psNext)
-	{
-		isNextExisting = false;
-	}
-	else
-	{
-		isNextExisting = true;
-	}
-	return isNextExisting;
-}

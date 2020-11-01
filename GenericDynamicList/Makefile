@@ -9,7 +9,7 @@
 #############################################################################
  
 CC=gcc
-CFLAGS=-g -Wall
+CFLAGS= -g -Wall -Werror
 
 #-g 	: includes debug symbols
 #-Wall	: shows gcc warnings
@@ -33,6 +33,10 @@ bin/listdriver.o: src/listdriver.c include/list.h
 
 bin/list.o: src/list.c include/list.h
 	${CC} ${CFLAGS} -c -o bin/list.o src/list.c 
+
+valgrind: bin/listdriver
+	valgrind -v --leak-check=yes --track-origins=yes --leak-check=full \
+--show-leak-kinds=all bin/listdriver
 
 tarball: clean
 	tar czf ../cs300_2B_pino3567.tar.gz ../GenericDynamicList

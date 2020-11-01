@@ -1,5 +1,5 @@
 /**************************************************************************
- File name: 	listDirver.c
+ File name: 	listDriver.c
  Author:   	 	Kailani Pinon
  Date:				10.06.2020
  Class:				CS300
@@ -11,8 +11,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <limits.h>
 #include "../include/list.h"
+#include <limits.h>
+#include <float.h>
 
 /**************************************************************************
  Function: 	 	success
@@ -81,22 +82,112 @@ static void printIntList (List sTheList)
 		lstFirst (&sTheList);
 		for (i = 0; i < lstSize (&sTheList); ++i)
 		{
-			lstPeek(&sTheList, &theIntData, sizeof(int));
-			printf ("%d ", theIntData);
-
+			lstPeek(&sTheList,  &theIntData, sizeof (int));
 			lstNext (&sTheList);
+			printf ("%d ", theIntData);
 		}
 		printf ("\n");
 	}
 }
+
+
+void insertAndValidManyTypes(ListPtr psTheList)
+{
+	// int
+	int maxInt = INT_MAX;
+
+	// char
+	char maxChar = CHAR_MAX;
+
+	// double
+	double maxDouble = DBL_MAX;
+
+	// float
+	float maxFloat = FLT_MAX;
+
+	// bool
+	bool bTrue = true;
+
+	// short
+	short maxShort = SHRT_MAX;
+
+	// long long
+	long long maxLongLong = LLONG_MAX;
+
+	lstInsertAfter(psTheList, &maxInt, sizeof(int));
+	lstInsertAfter(psTheList, &maxChar, sizeof(char));
+	lstInsertAfter(psTheList, &maxDouble, sizeof(double));
+	lstInsertAfter(psTheList, &maxFloat, sizeof(float));
+	lstInsertAfter(psTheList, &bTrue, sizeof(bool));
+	lstInsertAfter(psTheList, &maxShort, sizeof(short));
+	lstInsertAfter(psTheList, &maxLongLong, sizeof(long long));
+
+	lstFirst(psTheList);
+
+	maxInt = 0;
+	lstPeek(psTheList, &maxInt, sizeof(int));
+	assert(INT_MAX == maxInt, "Max int correct", "Max int incorrect");
+	lstNext(psTheList);
+
+	maxChar = 0;
+	lstPeek(psTheList, &maxChar, sizeof(char));
+	assert(CHAR_MAX == maxChar, "Max char correct", "Max char incorrect");
+	lstNext(psTheList);
+
+	maxDouble = 0.0;
+	lstPeek(psTheList, &maxDouble, sizeof(double));
+	assert(DBL_MAX == maxDouble, "Max double correct", "Max double incorrect");
+	lstNext(psTheList);
+
+	maxFloat = 0.0;
+	lstPeek(psTheList, &maxFloat, sizeof(float));
+	assert(FLT_MAX == maxFloat, "Max float correct", "Max float incorrect");
+	lstNext(psTheList);
+
+	bTrue = false;
+	lstPeek(psTheList, &bTrue, sizeof(bool));
+	assert(true == bTrue, "Max TRUE correct", "Max TRUE incorrect");
+	lstNext(psTheList);
+
+	maxShort = 0;
+	lstPeek(psTheList, &maxShort, sizeof(short));
+	assert(SHRT_MAX == maxShort, "Max short correct", "Max short incorrect");
+	lstNext(psTheList);
+
+	maxLongLong = 0;
+	lstPeek(psTheList, &maxLongLong, sizeof(long long));
+	assert(LLONG_MAX == maxLongLong, "Max long long correct", "Max long long incorrect");
+	lstNext(psTheList);
+}
+
+void makeBigList(ListPtr psList, int max)
+{
+	int i;
+
+	// insert max nodes
+	for (i = 0; i < max; ++i)
+	{
+		lstInsertAfter (psList, &i, sizeof (int));
+	}
+
+	assert( max == lstSize (psList), "The list size is max",
+			"The list size is not max");
+
+	assert( !lstIsEmpty (psList), "The list is NOT empty",
+			"The list is empty");
+
+	// For debugging purposes only
+	 //printIntList(psList);
+
+}
+
 /**************************************************************************
  Function: 	 	main
 
  Description: test all the functionality of the list
 
  Parameters:	none
-
- Returned:	 	EXIT_SUCCESS
+ Returned:	 	none
  *************************************************************************/
 
 int main ()
@@ -140,8 +231,6 @@ int main ()
 
 		lstFirst (&sTheList);
 		i = 0;
-
-		//lstHasCurrent implementation error! Gets stuck here!
 		while(lstHasCurrent(&sTheList))
 		{
 			lstPeek(&sTheList, &intValue, sizeof(int));
@@ -156,22 +245,11 @@ int main ()
 			intValue = 0;
 
 			lstPeek(&sTheList, &intValue, sizeof(int));
-			if (i+1 == intValue)
+			if (i+1 != intValue)
 			{
-				assert( i+1 != intValue, "Peek returns the correct value (int)",
+				assert( i+1 == intValue, "Peek returns the correct value (int)",
 						"Peek return the incorrect value (int)");
 			}
-			//Why is assert i+1 != intValue?
-			//when intValue = 0, then 0+1 != intValue
-			//and 1 != intValue is true
-			//but assert says if 1 == intValue (which is zero) then
-			//peek is correct? Even though 1 != 0?
-			//I changed i+1 != intValue for assert, seeing as
-			//it needs to be true in order for it to even enter the
-			//if statement in the first place. But then changed back.
-			//Alternatively: if statement could have been == to
-			//possibly match assert? Confused about validation to
-			//enter if, only for contradicting assert?
 
 			++i;
 			lstNext (&sTheList);
@@ -184,7 +262,7 @@ int main ()
 				"The list size is not 10");
 
 		// For debugging purposes only
-		//printIntList (sTheList);
+		printIntList (sTheList);
 
 		lstFirst(&sTheList);
 
@@ -193,7 +271,8 @@ int main ()
 		// should be 2
 		lstPeekNext(&sTheList, &intValue, sizeof(int));
 		assert(2 == intValue, "PeekNext is correct", "PeekNext is wrong");
-//ERROR HERE! Peek Next incorrect
+
+		//error here! tryin to peek improper current after delete!
 		// delete the first element!
 		lstDeleteCurrent(&sTheList, &intValue, sizeof(int));
 
