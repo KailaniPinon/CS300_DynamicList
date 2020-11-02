@@ -537,21 +537,13 @@ void *lstDeleteCurrent (ListPtr psList, void *pBuffer, int size)
 		psTempListElement = (ListElementPtr) malloc (sizeof(ListElement));
 		psTempListElement = psList->psCurrent;
 		psTempListElement->psNext = psList->psCurrent->psNext;
-		lstFirst (psList);
+		//lstFirst (psList);
 
 		puts ("ATTEMPTING TO REMOVE CURRENT");
 
 			if (psList->psFirst == psList->psLast) //if only 1 item
 			{
-				//remove the only element
-				//free(psList->psCurrent->pData);
-				//free(psList->psCurrent);
-				psList->psCurrent->pData = NULL;
-				psList->psCurrent = NULL;
-				psList->psFirst->pData = NULL;
-				psList->psFirst = NULL;
-				psList->psLast->pData = NULL;
-				psList->psLast = NULL;
+				lstTerminate(psList);
 			}
 			else if (psList->psCurrent == psList->psLast &&
 							 psList->psLast != psList->psFirst) //if at end of list
@@ -571,11 +563,6 @@ void *lstDeleteCurrent (ListPtr psList, void *pBuffer, int size)
 
 			//set last to current
 			psList->psLast = psList->psCurrent;
-
-			//safeguard and erase address associations with initial last
-			free (psTempListElement->pData);
-			free (psTempListElement);
-			psTempListElement = NULL;
 		}
 		else if (psList->psCurrent == psList->psFirst &&
 						 NULL != psList->psFirst->psNext) //if first->next exists
@@ -586,15 +573,7 @@ void *lstDeleteCurrent (ListPtr psList, void *pBuffer, int size)
 
 			//move to item proceeding first
 			lstNext (psList);
-
-			//set current to first
 			psList->psFirst = psList->psCurrent;
-			//free (psTempListElement->pData);
-			//free (psTempListElement->psNext);
-			//free (psTempListElement);
-			psTempListElement->pData = NULL;
-			psTempListElement->psNext = NULL;
-			psTempListElement = NULL;
 		}
 		else //if starting in middle
 		{
@@ -613,20 +592,13 @@ void *lstDeleteCurrent (ListPtr psList, void *pBuffer, int size)
 			//connect current's preceding element with current's proceeding element
 			psList->psCurrent->psNext = psTempListElement->psNext;
 
-			//free (psTempListElement->pData);
-			//free (psTempListElement->psNext);
-			//free (psTempListElement);
+			//safeguard and erase address associations with initial last
+			free (psTempListElement->pData);
+			free (psTempListElement);
 			psTempListElement->pData = NULL;
-			psTempListElement->psNext = NULL;
 			psTempListElement = NULL;
 		}
-		//ISSUES HERE. LEFT OFF! FIX!
 	}
-	//reduce list size count by 1
-	//ONLY 2 FREES!
-	//see trello for copy paste of part B grading rubric!
-	//TODO: THIS IS WHERE I LEFT OFF. MAKE SURE MIDDLE DELETE UPDATES PROPERLY!
-	//checking if new current is the item proceeding initial current
 	--(psList->numElements);
 	return pBuffer;
 }
