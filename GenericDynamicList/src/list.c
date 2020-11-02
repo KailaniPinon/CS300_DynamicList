@@ -82,18 +82,21 @@ void lstTerminate (ListPtr psList)
 	//use placeholder to assist with pointing at addresses of items
 	ListElementPtr psTempElement;
 
-	//start from the first item
-	psTempElement = psList->psFirst;
 
 	//walk through the list, removing all items
-	while (NULL != psTempElement && !lstIsEmpty(psList))
+	while (/*NULL != psTempElement &&*/ !lstIsEmpty(psList))
 	{
-		psList->psFirst = psTempElement->psNext;
+		//start from the first item
+		psTempElement = psList->psFirst;
 
-		free (psTempElement->pData);
+		free (psTempElement->pData); //valgrind error, but KEEP
 		free (psTempElement);
 
-		psTempElement = psList->psFirst;
+		psTempElement->pData = NULL;
+		psTempElement = NULL;
+
+		//todo: fix valgrind error
+		//psTempElement = psList->psFirst; //can't do this after freeing psTempElement?!
 		psList->numElements--;
 	}
 	psList->psCurrent = NULL;
@@ -469,9 +472,9 @@ void lstInsertAfter (ListPtr psList, const void *pBuffer, int size)
 			psList->psFirst->psNext = psList->psLast = psList->psCurrent = psNewListElement;
 			//puts ("INSERTING 2ND ITEM INTO LIST!");
 		}
-		else //if more than 2 items
+		else //if more than 1 item and starting at end
 		{
-			if (psList->psCurrent == psList->psLast)
+			if (psList->psCurrent == psList->psLast && psList->psCurrent != psList->psFirst)
 			{
 				//point current to new item
 				//set current and last to new item
@@ -539,7 +542,7 @@ void *lstDeleteCurrent (ListPtr psList, void *pBuffer, int size)
 		psTempListElement->psNext = psList->psCurrent->psNext;
 		//lstFirst (psList);
 
-		puts ("ATTEMPTING TO REMOVE CURRENT");
+		//puts ("ATTEMPTING TO REMOVE CURRENT");
 
 			if (psList->psFirst == psList->psLast) //if only 1 item
 			{
@@ -629,47 +632,73 @@ void lstInsertBefore (ListPtr psList, const void *pBuffer, int size)
 	{
 		processListError ("lstInsertBefore", ERROR_NULL_PTR);
 	}
-	else if (lstIsEmpty (psList) && NULL == psList->psCurrent)
+	else if (lstIsEmpty (psList) && NULL == psList)
 	{
 		processListError ("lstInsertBefore", ERROR_NO_CURRENT);
 	}
 	else
 	{
-		ListElementPtr psTempListElement;
-		psTempListElement = (ListElementPtr) malloc (sizeof(ListElement));
-		psTempListElement->pData = malloc (size);
-		memcpy (psTempListElement->pData, pBuffer, size);
-		psTempListElement->psNext = psList->psCurrent;
+		//new space for brand new element to insert
+		ListElementPtr psNewListElement;
+		psNewListElement = (ListElementPtr) malloc (sizeof(ListElement));
+		psNewListElement->pData = malloc (size);
+		memcpy (psNewListElement->pData, pBuffer, size);
 
-		if (psList->psFirst != psList->psCurrent)
+		if (!lstHasCurrent (psList)) //if empty
 		{
-			ListElementPtr psOriginalListCurrent = (ListElementPtr) malloc
-														(sizeof(ListElementPtr));
-			psOriginalListCurrent->pData = malloc (size);
-			memcpy (psOriginalListCurrent->pData, psList->psCurrent->pData,
-					size);
-			psOriginalListCurrent = psList->psCurrent;
-			//set current to first
-			lstFirst (psList);
-			//move along list until current->next = intialCurrentTemp
-			int counter = 0;
-			do
+			psList->psCurrent = psList->psFirst = psList->psLast = psNewListElement;
+			//puts ("INSERTING FIRST ITEM INTO LIST!");
+		}
+		else if (psList->psFirst == psList->psLast && false == lstHasNext (psList))
+		//if only 1 item
+		{
+			//point new item to first
+			//set current and last to new item
+			psNewListElement->psNext = psList->psLast = psList->psCurrent =
+					psList->psFirst;
+			psList->psFirst = psNewListElement;
+			//puts ("INSERTING 2ND ITEM INTO LIST!");
+		}
+		else //if more than 1 items
+		{
+			if (psList->psCurrent == psList->psLast && psList->psCurrent != psList->psFirst)
 			{
-				lstNext (psList);
-				counter++;
-			} while (psList->psCurrent->psNext != psOriginalListCurrent
-					&& counter < psList->numElements);
+				psNewListElement->psNext = psList->psLast;
 
-			psList->psCurrent->psNext = psTempListElement;
-			psList->psCurrent = psTempListElement;
+				//walk thru list and stop at element preceding last
+				//in order to connect it to the new element
+				lstFirst(psList);
+				do
+				{
+					lstNext(psList);
+				} while (psList->psCurrent->psNext != psList->psLast);
+
+				//connect next to new element
+				psList->psCurrent->psNext = psNewListElement;
+			}
+			else if (psList->psCurrent == psList->psFirst)
+			{
+				psNewListElement->psNext = psList->psFirst;
+				psList->psFirst = psNewListElement;
+			}
+			else //if starting in middle
+			{
+				//set new's next to current
+				psNewListElement->psNext = psList->psCurrent;
+
+				//walk thru list and stop at element preceding current
+				do
+				{
+					lstNext(psList);
+				} while (psList->psCurrent->psNext != psNewListElement->psNext);
+
+				//reroute current's next to new element
+				psList->psCurrent->psNext = psNewListElement;
+			}
 		}
-		else if (psList->psFirst == psList->psCurrent) //if first == current
-		{
-			psTempListElement->psNext = psList->psFirst;
-			psList->psCurrent = psTempListElement;
-		}
+			psList->psCurrent = psNewListElement;
+			(psList->numElements)++;
 	}
-	psList->numElements++;
 }
 
 /**************************************************************************
