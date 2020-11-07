@@ -13,31 +13,38 @@
 #include <string.h>
 #include <stdbool.h>
 
-/**************************************************************************
+#include "../include/pqueue.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+
+/****************************************************************************
  Function: 	 	success
 
  Description: print a success message
 
  Parameters:	szStr - the message to print
+
  Returned:	 	none
- *************************************************************************/
+ ****************************************************************************/
 static void success (char * szStr)
 {
 	printf ("SUCCESS: %s\n", szStr);
 }
 
-/**************************************************************************
+/****************************************************************************
  Function: 	 	failure
 
  Description: print a failure message
 
  Parameters:	szStr - the message to print
+
  Returned:	 	none
- *************************************************************************/
+ ****************************************************************************/
 static void failure (char * szStr)
 {
 	printf ("FAILURE: %s\n", szStr);
-	exit (EXIT_FAILURE);
 }
 
 /****************************************************************************
@@ -62,77 +69,145 @@ static void assert (bool bExpression, char *pTrue, char *pFalse)
 	}
 }
 
-/**************************************************************************
+/****************************************************************************
  Function: 	 	main
 
- Description: test all the functionality of the priority queue
+ Description: test all the functionality of the list
 
  Parameters:	none
+ Returned:	 	none
+ ****************************************************************************/
 
- Returned:	 	EXIT_SUCCESS
- *************************************************************************/
 int main ()
 {
+	PriorityQueue sThePQ;
+	int dataValue, priorityValue;
+	int i;
+	const int MAX_ITEMS = 4;
+	const int PRIORITY_TWO = 2;
 
-	PriorityQueue sMyQueue;
-	//todo: make a second list and test;
-	PriorityQueueElement sMyPQElement; //an item to insert to queue/list
-	int queueSize = 0, myPriority;
+	// MAX_VALUES is the size of the following two arrays
+	const int MAX_VALUES = 9;
+	// enter these priorities in this order
+	int priorityArray [] =  { 1, 10, 5, 0, 11, 4, 6, 5, 5};
 
-	//only needs to load once
-	lstLoadErrorMessages ();
-	//initializes sMyQueue;
-	pqueueCreate (&sMyQueue);
+	// Use these dataValues matched with the priorities above
+	// the data values must come out of the pq in ascending order
+	int dataValueArray [] = { 1, 7, 3, 0, 8, 2, 6, 4, 5};
 
-	queueSize = pqueueSize (&sMyQueue);
-	assert (queueSize == 0, "The size of the queue is 0",
-			"The size of the queue is not 0");
-	myPriority = 2;
-	pqueueEnqueue (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
-			myPriority);
-	queueSize = pqueueSize (&sMyQueue);
-	assert (queueSize == 1,
-			"1 Priority Queue Element has been added to the list.",
-			"1 Priority Queue Element was not successfully added to the list.");
+	// prevDataValue must be initialized to a value
+	// smaller than each value in dataValueArray
+	int prevDataValue = -1;
 
-	myPriority = 1;
-	pqueueEnqueue (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
-			myPriority);
-	queueSize = pqueueSize (&sMyQueue);
-	assert (queueSize == 2,
-			"2nd Priority Queue Element has been added to the list.",
-			"2nd Priority Queue Element was not successfully added to the list.");
+	const char CHAR_START = 'A';
+	char charData;
 
-	myPriority = 0;
-	pqueueEnqueue (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
-			myPriority);
-	queueSize = pqueueSize (&sMyQueue);
+	puts ("Program Start\n");
 
-	pqueuePeek (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
-			&myPriority);
-	assert (0 == myPriority, //valgrind error: use of uninitialized value
-	"Priority is 0.", "Priority isn't 0.");
+	pqueueLoadErrorMessages();
 
-	//lstFirst(&(sMyQueue.sTheList));
-	assert (2 == myPriority, //valgrind error: use of uninitialized value
-	"First item in list is now current. Priority is 2.",
-			"First item in list did not change to current. Priority is NOT 2.");
+	pqueueCreate (&sThePQ);
+	success ("PQ Create");
 
-	//BREAKS HERE//
+	assert (pqueueSize (&sThePQ) == 0, "pqueueSize is 0",
+																		 "pqueueSize is not 0");
 
-	//I don't think dequeue is working either - todo: fix???
-	pqueueDequeue (&sMyQueue, &sMyPQElement, sizeof(PriorityQueueElement),
-			&myPriority);
-	assert (1 == myPriority, "'sMyPQElement->priority' match 'myPriority'.",
-			"'sMyPQElement->priority' DOESN'T match 'myPriority'.");
+	assert (pqueueIsEmpty (&sThePQ), "pqueueIsEmpty", "!pqueueIsEmpty");
 
-	queueSize = pqueueSize (&sMyQueue);
-	assert (queueSize == 2, "The size of the queue is 2",
-			"The size of the queue is not 2");
 
-	//pqueueTerminate(&(sMyQueue->sTheList));
-	//error: invalid type argument
-	//
-	puts ("TEST: END.");
+	// priority 0-3
+	for( i = 0; i < MAX_ITEMS; ++i)
+	{
+		pqueueEnqueue (&sThePQ, &i, sizeof (int), i);
+	}
+
+	assert (MAX_ITEMS == pqueueSize (&sThePQ), "pqueueSize is correct",
+																		 "pqueueSize is not correct");
+
+
+	// priority 0-3
+	for( i = 0; i < MAX_ITEMS; ++i)
+	{
+		pqueueDequeue (&sThePQ, &dataValue, sizeof (int), &priorityValue);
+
+		if( dataValue != i || priorityValue != i)
+		{
+			assert(dataValue == i && priorityValue == i, "",
+					"Priority 0-3 error");
+		}
+	}
+
+	assert (pqueueSize (&sThePQ) == 0, "pqueueSize is 0",
+																		 "pqueueSize is not 0");
+
+	pqueueTerminate(&sThePQ);
+
+	pqueueCreate (&sThePQ);
+	// priority 3-0
+	for( i = MAX_ITEMS-1 ; i >= 0; --i)
+	{
+		charData = CHAR_START + i;
+		pqueueEnqueue (&sThePQ, &charData, sizeof (char), i);
+	}
+
+	// priority 0-3
+	for( i = 0; i < MAX_ITEMS; ++i)
+	{
+		pqueueDequeue (&sThePQ, &charData, sizeof (char), &priorityValue);
+
+		if( charData != CHAR_START + i || priorityValue != i)
+		{
+			assert(charData == CHAR_START + i && priorityValue == i, "",
+					"Priority 3-0 error");
+		}
+	}
+
+	// priority 2,2,2,2 (with values 1,2,3,4)
+	for( i = 0; i < MAX_ITEMS; ++i)
+	{
+		pqueueEnqueue (&sThePQ, &i, sizeof (int), PRIORITY_TWO);
+	}
+	// priority 0-3
+	for( i = 0; i < MAX_ITEMS; ++i)
+	{
+		pqueueDequeue (&sThePQ, &dataValue, sizeof (int), &priorityValue);
+		if( dataValue != i || priorityValue != PRIORITY_TWO)
+		{
+			assert(dataValue == i && priorityValue == PRIORITY_TWO, "",
+					"Priority 2,2,2,2 error");
+		}
+	}
+
+	for( i = 0; i < MAX_VALUES; ++i)
+	{
+
+		pqueueEnqueue (&sThePQ, &(dataValueArray[i]),
+				sizeof (int), (priorityArray[i]));
+	}
+
+
+	for( i = 0; i < MAX_VALUES; ++i)
+	{
+
+		pqueueDequeue (&sThePQ, &dataValue,	sizeof (int), &priorityValue);
+
+		if(!( dataValue > prevDataValue))
+		{
+			assert(dataValue > prevDataValue, "", "Data values incorrect");
+		}
+		prevDataValue = dataValue;
+	}
+
+	pqueueEnqueue (&sThePQ, &(dataValueArray[0]),
+			sizeof (int), (priorityArray[0]));
+
+	assert (!pqueueIsEmpty (&sThePQ), "!pqueueIsEmpty", "pqueueIsEmpty");
+
+	pqueueTerminate(&sThePQ);
+	success ("PQ Terminate");
+
+
+	puts ("\nProgram End");
+
 	return EXIT_SUCCESS;
 }

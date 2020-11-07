@@ -228,6 +228,8 @@ int main ()
 					"The list size is wrong");
 			}
 		}
+	//}
+	//printIntList (sTheList);
 
 		lstFirst (&sTheList);
 		i = 0;

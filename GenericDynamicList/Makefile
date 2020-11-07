@@ -9,14 +9,14 @@
 #############################################################################
  
 CC=gcc
-CFLAGS= -g -Wall -Werror
+CFLAGS= -g -Wall
 
 #-g 	: includes debug symbols
 #-Wall	: shows gcc warnings
 
 .PHONY: all clean
 
-TARGETS=bin/listdriver
+TARGETS= bin/listdriver
 
 all: bin ${TARGETS}
 
