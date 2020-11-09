@@ -20,5 +20,18 @@
 
 int main ()
 {
+/*
+ * === NOTE ===
+ *
+ * Airport is incredibly under-developed.
+ * I appreciate the extensions, but unfortunately
+ * have to report that this assignment is likely
+ * worth a zero.
+ *
+ * A makefile and header file have been attempted,
+ * but implementation is non-existent.
+ *
+ * -Kailani
+ */
 	return EXIT_SUCCESS;
 }

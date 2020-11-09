@@ -114,43 +114,40 @@ int main ()
 
 	assert (pqueueIsEmpty (&sThePQ), "pqueueIsEmpty", "!pqueueIsEmpty");
 
+	int peekVal, peekPriority;
+	// priority 0-3
+	for (i = 0; i < MAX_ITEMS; ++i)
+	{
+		printf ("\n===== ADDING PQ ELEMENT =====\n");
+		//printf ("DATA: %d, PRIORITY: %d\n", i, i);
+		pqueueEnqueue (&sThePQ, &i, sizeof(int), i);
 
+		//check if values are correct
+		peekPriority = i;
+		pqueuePeek (&sThePQ, &peekVal, sizeof(int), &peekPriority);
+		printf ("i(%d) | p(%d) | ", i, peekPriority);
+		//assert (peekPriority. == i, "peekPriority = i", "peekPriority != i");
+	}
+	assert (MAX_ITEMS == pqueueSize (&sThePQ), "pqueueSize is correct",
+			"pqueueSize is not correct");
+	//maybe my assert is poorly written? but also peekPriority doesn't
+	//seem to be updating either???
+
+	puts ("===== DEQUEUE =====");
 	// priority 0-3
 	for( i = 0; i < MAX_ITEMS; ++i)
 	{
-		printf ("Attempting to add new element with the following items:\n");
-		printf ("DATA: %d, PRIORITY: %d\n", i, i);
-		pqueueEnqueue (&sThePQ, &i, sizeof (int), i);
+		pqueueDequeue (&sThePQ, &dataValue, sizeof (int), &priorityValue);
 
-		//check if values are correct
-		int peekVal;
-		int peekPriority;
-		pqueuePeek (&sThePQ, &peekVal, sizeof (int), &peekPriority);
-		assert (peekVal == i, "peekVal = i", "peekVal != i");
-		assert (peekVal == i, "peekPriority = i", "peekPriority != i");
-		printf ("Reading inputed values:\n");
-		printf ("DATA: %d, PRIORITY: %d\n", peekVal, peekPriority);
-
+		if( dataValue != i || priorityValue != i)
+		{
+			assert(dataValue == i && priorityValue == i, "",
+					"Priority 0-3 error");
+		}
 	}
 
-	assert (MAX_ITEMS == pqueueSize (&sThePQ), "pqueueSize is correct",
-																		 "pqueueSize is not correct");
-
-
-//	// priority 0-3
-//	for( i = 0; i < MAX_ITEMS; ++i)
-//	{
-//		pqueueDequeue (&sThePQ, &dataValue, sizeof (int), &priorityValue);
-//
-//		if( dataValue != i || priorityValue != i)
-//		{
-//			assert(dataValue == i && priorityValue == i, "",
-//					"Priority 0-3 error");
-//		}
-//	}
-//
-//	assert (pqueueSize (&sThePQ) == 0, "pqueueSize is 0",
-//																		 "pqueueSize is not 0");
+	assert (pqueueSize (&sThePQ) == 0, "pqueueSize is 0",
+																		 "pqueueSize is not 0");
 //
 //	pqueueTerminate(&sThePQ);
 //

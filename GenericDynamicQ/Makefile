@@ -63,12 +63,12 @@ valgrind: bin/pqueuedriver
 
 #zipping (tarball)
 tarball: clean
-	tar czf ../../cs300_3_pino3567.tar.gz ../../CS300_DynamicList
+	tar czf ../../cs300_4_pino3567.tar.gz ../../CS300_DynamicList
 
 #clean
 clean:
 	cd ../GenericDynamicList; make clean
 	cd ../GenericDynamicPriorityQ; make clean
-	cd ../GenericDynamicQueue; make clean
-	rm -f bin/*.o bin/airportdriver
+#	cd GenericDynamicQ; make clean
+	rm -f bin/*.o bin/queuedriver
 	

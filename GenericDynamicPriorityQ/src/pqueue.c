@@ -205,7 +205,7 @@ void pqueueEnqueue (PriorityQueuePtr psQueue, const void *pBuffer, int size,
  	 	 	 	 	 	 	 	size		- memory size of content
  	 	 	 	 	 	 	 	priority-	index of element
 
- Returned:			None
+ Returned:			pPriority
  *************************************************************************/
 void *pqueueDequeue (PriorityQueuePtr psQueue, void *pBuffer, int size,
 		int *pPriority)
@@ -222,28 +222,15 @@ void *pqueueDequeue (PriorityQueuePtr psQueue, void *pBuffer, int size,
 	{
 		if (!lstIsEmpty (&(psQueue->sTheList)))
 		{
-			//go to front
-			//assign temp to front
-
-			//move current to next (element #2)
-			//delete temp (element #1)
+			//create temporary element to hold values
+			PriorityQueueElementPtr psTemp;
+			psTemp = (PriorityQueueElementPtr) malloc (sizeof(PriorityQueueElement));
+			int *pInt;
+			pInt = malloc (sizeof(int));
 
 			//go to front to remove element (Last in, First out)
 			lstFirst (&(psQueue->sTheList));
-
-			//retrieve element to remove (current, a.k.a first)
-			PriorityQueueElementPtr psPeekedElement;
-			psPeekedElement = (PriorityQueueElementPtr) malloc (sizeof(PriorityQueueElement));
-
-			//retrieve peek values
-			//int peekedPriority;
-			//void *peekedData;
-			//pqueuePeek(&(psQueue->sTheList), pBuffer, size, &peekedPriority);
-			//psPeekedElement->priority = pqueuePeek (&(psQueue->sTheList), pBuffer, size, pPriority);
-
-			//return values into arguments
-			memcpy (pBuffer, psPeekedElement->pData, size);
-			memcpy (pPriority, &(psPeekedElement->priority), sizeof(int));
+			pqueuePeek(psQueue, psTemp, size, pInt);
 
 			//deletes current a.k.a first, since we called lstFirst earlier
 			lstDeleteCurrent (&(psQueue->sTheList), pBuffer, size);
@@ -259,9 +246,9 @@ void *pqueueDequeue (PriorityQueuePtr psQueue, void *pBuffer, int size,
 								the argument list
 
  Parameters: 		psQueue	- pointer to priority queue
- 	 	 	 	 	 	 	 	pBuffer - content in element
- 	 	 	 	 	 	 	 	size		- memory size of content
- 	 	 	 	 	 	 	 	priority-	index of element
+ 	 	 	 	 	 	 	 	pBuffer - the priority queue element being peeked
+ 	 	 	 	 	 	 	 	size		- memory size of the priority queue element
+ 	 	 	 	 	 	 	 	priority-	index-like importance value of element
 
  Returned:			priority
  *************************************************************************/
@@ -280,19 +267,22 @@ void* pqueuePeek (PriorityQueuePtr psQueue, void *pBuffer, int size,
 	{
 		processPQError ("pqueuePeek", ERROR_EMPTY_PQ);
 	}
-	else
-	{
+	//is pBuffer for pData or for the element in list?
+//UGHSDLKFJ:SDKJF:LKSDFJ
 		//allocated space for element and priority value
 		pBuffer = malloc(sizeof(PriorityQueueElement));
 		priority = malloc(sizeof(int));
 
 		//retrieve first element
-		PriorityQueueElement sPeekElement;
-		lstPeek(&(psQueue->sTheList), &sPeekElement, sizeof(PriorityQueueElement));
+		//lstFirst(&(psQueue->sTheList)); //todo: TURN BACK ON!
+		PriorityQueueElement psPeekElement;
+		lstPeek(&(psQueue->sTheList), &psPeekElement, sizeof(PriorityQueueElement));
 
-		printf ("WHAT AM I DOING? PQ.PRIORITY: %d\n", sPeekElement.priority);
-		//*(PriorityQueueElementPtr) psPeekElement = sPeekElement;
-	}
+		//return priority
+		memcpy (priority, &(psPeekElement.priority), sizeof(int));
+		memcpy (pBuffer, &(psPeekElement.pData), sizeof(int));
+
+		printf ("---> CHECK PQ.PRIORITY: %d\n", psPeekElement.priority);
 
 	return priority;
 }

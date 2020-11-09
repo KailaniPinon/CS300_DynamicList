@@ -17,5 +17,15 @@
 
 int main ()
 {
+	puts ("\n=== NOTE ===");
+	printf("FILE EMPTY. SORRY. I attempted the project,\n"
+				 "but truthfully spent a large amount of it\n"
+				 "trying to address and amend errors from list\n"
+				 "and priority queue. I'm very much expecting\n"
+				 "a zero based on what I'm imaging the rubric is\n"
+				 "going to look like, though.\n\n"
+				"I am very grateful for the extensions, though.\n"
+				 "I'm just sorry I couldn't do better...\n\n"
+				 "-Kailani (11-09-2020)\n\n");
 	return EXIT_SUCCESS;
 }
