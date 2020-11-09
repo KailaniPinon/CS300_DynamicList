@@ -88,21 +88,28 @@ void lstTerminate (ListPtr psList)
 	{
 		//start from the first item
 		//psTempElement = psList->psFirst;
-		psList->psCurrent = psList->psFirst;
-		if (NULL != psList->psFirst->psNext)
-		{
-			psList->psFirst = psList->psFirst->psNext;
-		}
+		//psList->psCurrent = psList->psFirst;
+		lstFirst(psList);
 
+		//if (NULL != psList->psFirst->psNext)
+
+//VAAALGRIIIIND todo:fix
 		//free (psTempElement->pData); //valgrind error, but KEEP
 		//free (psTempElement);
+				//ERROR HERE WHEN BEING ACCESSED BY PQ
 		free (psList->psCurrent->pData);
 		free (psList->psCurrent);
-
+		psList->psCurrent->pData = NULL;
+		psList->psCurrent = NULL;
 		//psTempElement->pData = NULL;
 		//psTempElement = NULL;
 		//todo: remove old temp logic, using current directly instead
 
+		if (lstHasNext(psList))
+		{
+			//psList->psFirst = psList->psFirst->psNext;
+			lstNext(psList);
+		}
 		psList->numElements--;
 	}
 	psList->psCurrent = NULL;

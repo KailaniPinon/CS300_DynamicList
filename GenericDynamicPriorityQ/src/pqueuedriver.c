@@ -118,93 +118,105 @@ int main ()
 	// priority 0-3
 	for( i = 0; i < MAX_ITEMS; ++i)
 	{
+		printf ("Attempting to add new element with the following items:\n");
+		printf ("DATA: %d, PRIORITY: %d\n", i, i);
 		pqueueEnqueue (&sThePQ, &i, sizeof (int), i);
+
+		//check if values are correct
+		int peekVal;
+		int peekPriority;
+		pqueuePeek (&sThePQ, &peekVal, sizeof (int), &peekPriority);
+		assert (peekVal == i, "peekVal = i", "peekVal != i");
+		assert (peekVal == i, "peekPriority = i", "peekPriority != i");
+		printf ("Reading inputed values:\n");
+		printf ("DATA: %d, PRIORITY: %d\n", peekVal, peekPriority);
+
 	}
 
 	assert (MAX_ITEMS == pqueueSize (&sThePQ), "pqueueSize is correct",
 																		 "pqueueSize is not correct");
 
 
-	// priority 0-3
-	for( i = 0; i < MAX_ITEMS; ++i)
-	{
-		pqueueDequeue (&sThePQ, &dataValue, sizeof (int), &priorityValue);
-
-		if( dataValue != i || priorityValue != i)
-		{
-			assert(dataValue == i && priorityValue == i, "",
-					"Priority 0-3 error");
-		}
-	}
-
-	assert (pqueueSize (&sThePQ) == 0, "pqueueSize is 0",
-																		 "pqueueSize is not 0");
-
-	pqueueTerminate(&sThePQ);
-
-	pqueueCreate (&sThePQ);
-	// priority 3-0
-	for( i = MAX_ITEMS-1 ; i >= 0; --i)
-	{
-		charData = CHAR_START + i;
-		pqueueEnqueue (&sThePQ, &charData, sizeof (char), i);
-	}
-
-	// priority 0-3
-	for( i = 0; i < MAX_ITEMS; ++i)
-	{
-		pqueueDequeue (&sThePQ, &charData, sizeof (char), &priorityValue);
-
-		if( charData != CHAR_START + i || priorityValue != i)
-		{
-			assert(charData == CHAR_START + i && priorityValue == i, "",
-					"Priority 3-0 error");
-		}
-	}
-
-	// priority 2,2,2,2 (with values 1,2,3,4)
-	for( i = 0; i < MAX_ITEMS; ++i)
-	{
-		pqueueEnqueue (&sThePQ, &i, sizeof (int), PRIORITY_TWO);
-	}
-	// priority 0-3
-	for( i = 0; i < MAX_ITEMS; ++i)
-	{
-		pqueueDequeue (&sThePQ, &dataValue, sizeof (int), &priorityValue);
-		if( dataValue != i || priorityValue != PRIORITY_TWO)
-		{
-			assert(dataValue == i && priorityValue == PRIORITY_TWO, "",
-					"Priority 2,2,2,2 error");
-		}
-	}
-
-	for( i = 0; i < MAX_VALUES; ++i)
-	{
-
-		pqueueEnqueue (&sThePQ, &(dataValueArray[i]),
-				sizeof (int), (priorityArray[i]));
-	}
-
-
-	for( i = 0; i < MAX_VALUES; ++i)
-	{
-
-		pqueueDequeue (&sThePQ, &dataValue,	sizeof (int), &priorityValue);
-
-		if(!( dataValue > prevDataValue))
-		{
-			assert(dataValue > prevDataValue, "", "Data values incorrect");
-		}
-		prevDataValue = dataValue;
-	}
-
-	pqueueEnqueue (&sThePQ, &(dataValueArray[0]),
-			sizeof (int), (priorityArray[0]));
-
-	assert (!pqueueIsEmpty (&sThePQ), "!pqueueIsEmpty", "pqueueIsEmpty");
-
-	pqueueTerminate(&sThePQ);
-	success ("PQ Terminate");
+//	// priority 0-3
+//	for( i = 0; i < MAX_ITEMS; ++i)
+//	{
+//		pqueueDequeue (&sThePQ, &dataValue, sizeof (int), &priorityValue);
+//
+//		if( dataValue != i || priorityValue != i)
+//		{
+//			assert(dataValue == i && priorityValue == i, "",
+//					"Priority 0-3 error");
+//		}
+//	}
+//
+//	assert (pqueueSize (&sThePQ) == 0, "pqueueSize is 0",
+//																		 "pqueueSize is not 0");
+//
+//	pqueueTerminate(&sThePQ);
+//
+//	pqueueCreate (&sThePQ);
+//	// priority 3-0
+//	for( i = MAX_ITEMS-1 ; i >= 0; --i)
+//	{
+//		charData = CHAR_START + i;
+//		pqueueEnqueue (&sThePQ, &charData, sizeof (char), i);
+//	}
+//
+//	// priority 0-3
+//	for( i = 0; i < MAX_ITEMS; ++i)
+//	{
+//		pqueueDequeue (&sThePQ, &charData, sizeof (char), &priorityValue);
+//
+//		if( charData != CHAR_START + i || priorityValue != i)
+//		{
+//			assert(charData == CHAR_START + i && priorityValue == i, "",
+//					"Priority 3-0 error");
+//		}
+//	}
+//
+//	// priority 2,2,2,2 (with values 1,2,3,4)
+//	for( i = 0; i < MAX_ITEMS; ++i)
+//	{
+//		pqueueEnqueue (&sThePQ, &i, sizeof (int), PRIORITY_TWO);
+//	}
+//	// priority 0-3
+//	for( i = 0; i < MAX_ITEMS; ++i)
+//	{
+//		pqueueDequeue (&sThePQ, &dataValue, sizeof (int), &priorityValue);
+//		if( dataValue != i || priorityValue != PRIORITY_TWO)
+//		{
+//			assert(dataValue == i && priorityValue == PRIORITY_TWO, "",
+//					"Priority 2,2,2,2 error");
+//		}
+//	}
+//
+//	for( i = 0; i < MAX_VALUES; ++i)
+//	{
+//
+//		pqueueEnqueue (&sThePQ, &(dataValueArray[i]),
+//				sizeof (int), (priorityArray[i]));
+//	}
+//
+//
+//	for( i = 0; i < MAX_VALUES; ++i)
+//	{
+//
+//		pqueueDequeue (&sThePQ, &dataValue,	sizeof (int), &priorityValue);
+//
+//		if(!( dataValue > prevDataValue))
+//		{
+//			assert(dataValue > prevDataValue, "", "Data values incorrect");
+//		}
+//		prevDataValue = dataValue;
+//	}
+//
+//	pqueueEnqueue (&sThePQ, &(dataValueArray[0]),
+//			sizeof (int), (priorityArray[0]));
+//
+//	assert (!pqueueIsEmpty (&sThePQ), "!pqueueIsEmpty", "pqueueIsEmpty");
+//
+//	pqueueTerminate(&sThePQ);
+//	success ("PQ Terminate");
 
 
 	puts ("\nProgram End");

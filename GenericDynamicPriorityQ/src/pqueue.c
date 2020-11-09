@@ -64,14 +64,14 @@ void pqueueCreate (PriorityQueuePtr psQueue)
 	}
 	else
 	{
-		lstCreate (&psQueue->sTheList);
+		lstCreate (&(psQueue->sTheList));
 	}
 }
 
 /**************************************************************************
  Function:			pqueueTerminate
 
- Description: 	If PQ ccan be terminated, the PQ no longer exists and is
+ Description: 	If PQ can be terminated, the PQ no longer exists and is
  	 	 	 	 	 	 	 	empty.
 
  Parameters: 		psQueue	- pointer to priority queue
@@ -88,6 +88,7 @@ void pqueueTerminate (PriorityQueuePtr psQueue)
 	{
 		lstTerminate (&psQueue->sTheList);
 		//free (&psQueue);
+		psQueue = NULL;
 	}
 }
 
@@ -151,44 +152,42 @@ void pqueueEnqueue (PriorityQueuePtr psQueue, const void *pBuffer, int size,
 	{
 		processPQError ("pqueueEnqueue", ERROR_NULL_PQ_PTR);
 	}
+	//create a new priority queue element
+	//insert that element into end of list (Last in, first out)
+
 	//create a queue element pointer to store priority and data value
 	PriorityQueueElementPtr psNewPQElement;
 	psNewPQElement = (PriorityQueueElementPtr) malloc (
-									  sizeof(PriorityQueueElement));
+										sizeof(PriorityQueueElement));
 	psNewPQElement->pData = malloc (size);
+	memcpy (psNewPQElement->pData, pBuffer, size);
+	memcpy (&(psNewPQElement->priority), &priority, size);
 
-	//create element that above pointer points to
-	//and store appropriate arguments into new element
-	PriorityQueueElement psNewElement;
-	psNewElement.priority = priority;
-	psNewElement.pData = &pBuffer; //use for *void
-
-	//have pointer point to element
-	psNewPQElement = &psNewElement;
 	if (pqueueIsEmpty (psQueue)) //list empty
 	{
-		lstInsertAfter (&(psQueue->sTheList), &psNewPQElement, size);
-		lstFirst (&(psQueue->sTheList)); //current assigned to new node
-		//puts ("FIRST ITEM ADDED!");
+		lstInsertAfter (&(psQueue->sTheList), psNewPQElement, size);
+		//lstFirst (&(psQueue->sTheList)); //current assigned to new node
+		puts ("FIRST PQ ITEM ADDED!");
 	}
 	else if (!(pqueueIsEmpty (psQueue)) && !lstHasNext (&(psQueue->sTheList)))
-	//if only 1 item, insert item after first
+	//if current = last, insert item after last
 	{
 		//unsure, but I don't think next is being updated
-		lstInsertAfter (&(psQueue->sTheList), &psNewPQElement, size);
+		lstInsertAfter (&(psQueue->sTheList), psNewPQElement, size);
+		puts ("END PQ ITEM ADDED!");
 	}
-	else
+	else if (!(pqueueIsEmpty (psQueue)) && lstHasNext (&(psQueue->sTheList)))
+	//if 2 or more items exist
 	{
 		lstFirst (&(psQueue->sTheList));
 		do
 		{
-			lstPeek (&(psQueue->sTheList), &psNewElement,
-					sizeof(PriorityQueueElement));
+			lstPeek (&(psQueue->sTheList), psNewPQElement, sizeof(PriorityQueueElement));
 			//psNewElement.priority
 			//place element in list
 			lstNext (&(psQueue->sTheList));
 
-		} while (psNewElement.priority > priority); //
+		} while (psNewPQElement->priority > priority); //
 		//zero highest priority/precedence
 
 		lstNext (&psQueue->sTheList);
@@ -221,8 +220,34 @@ void *pqueueDequeue (PriorityQueuePtr psQueue, void *pBuffer, int size,
 	}
 	else
 	{
-		lstFirst (&psQueue->sTheList);
-		lstDeleteCurrent (&psQueue->sTheList, pBuffer, size);
+		if (!lstIsEmpty (&(psQueue->sTheList)))
+		{
+			//go to front
+			//assign temp to front
+
+			//move current to next (element #2)
+			//delete temp (element #1)
+
+			//go to front to remove element (Last in, First out)
+			lstFirst (&(psQueue->sTheList));
+
+			//retrieve element to remove (current, a.k.a first)
+			PriorityQueueElementPtr psPeekedElement;
+			psPeekedElement = (PriorityQueueElementPtr) malloc (sizeof(PriorityQueueElement));
+
+			//retrieve peek values
+			//int peekedPriority;
+			//void *peekedData;
+			//pqueuePeek(&(psQueue->sTheList), pBuffer, size, &peekedPriority);
+			//psPeekedElement->priority = pqueuePeek (&(psQueue->sTheList), pBuffer, size, pPriority);
+
+			//return values into arguments
+			memcpy (pBuffer, psPeekedElement->pData, size);
+			memcpy (pPriority, &(psPeekedElement->priority), sizeof(int));
+
+			//deletes current a.k.a first, since we called lstFirst earlier
+			lstDeleteCurrent (&(psQueue->sTheList), pBuffer, size);
+		}
 	}
 	return pPriority;
 }
@@ -247,22 +272,27 @@ void* pqueuePeek (PriorityQueuePtr psQueue, void *pBuffer, int size,
 	{
 		processPQError ("pqueuePeek", ERROR_INVALID_PQ);
 	}
-	if (NULL == pBuffer)
+	else if (NULL == pBuffer)
 	{
 		processPQError ("pqueuePeek", ERROR_NULL_PQ_PTR);
 	}
-	if (pqueueIsEmpty (psQueue))
+	else if (pqueueIsEmpty (psQueue))
 	{
 		processPQError ("pqueuePeek", ERROR_EMPTY_PQ);
 	}
-	lstFirst (&psQueue->sTheList);
+	else
+	{
+		//allocated space for element and priority value
+		pBuffer = malloc(sizeof(PriorityQueueElement));
+		priority = malloc(sizeof(int));
 
-	//create a queue element to store priority and data value
-	PriorityQueueElement psTempElement;
+		//retrieve first element
+		PriorityQueueElement sPeekElement;
+		lstPeek(&(psQueue->sTheList), &sPeekElement, sizeof(PriorityQueueElement));
 
-	//store appropriate arguments into new element
-	priority = lstPeek (&(psQueue->sTheList), &psTempElement.priority, size);
-	pBuffer = lstPeek (&(psQueue->sTheList), &psTempElement.pData, size);
+		printf ("WHAT AM I DOING? PQ.PRIORITY: %d\n", sPeekElement.priority);
+		//*(PriorityQueueElementPtr) psPeekElement = sPeekElement;
+	}
 
 	return priority;
 }
